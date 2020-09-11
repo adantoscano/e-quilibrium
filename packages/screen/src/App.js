@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from 'semantic-ui-react'
-import Canvas from './components/Canvas';
+import Screen from './components/Screen'
+import Device from './components/Device'
 import './App.css';
 
 function App() {
@@ -15,8 +16,8 @@ function App() {
       {
         (!isScreen && !isDevice) && <div> <Button onClick={handleScreenButton}>Screen</Button><Button onClick={handleDeviceButton}>Device</Button> </div>
       }
-      { isScreen && <Canvas /> }
-      { isDevice && 'Soy un móvil' }
+      { isScreen && <Screen /> }
+      { isDevice && <Device /> }
     </div >
   );
 }
