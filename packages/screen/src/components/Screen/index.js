@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Peer from 'simple-peer';
+import { Button, Form, TextArea } from 'semantic-ui-react'
 
 function Screen() {
   const [offer, setOffer] = useState('');
@@ -33,7 +34,12 @@ function Screen() {
     p.signal(JSON.parse(answer))
   }
 
-return (<div>{offer}</div>);
+return (<div>{offer}
+<Form>
+        <TextArea placeholder='paste answer here' onChange={e=>setAnswer(e.value)} />
+        <Button onClick={handleSubmitAnswer}/>
+      </Form>
+</div>);
 }
 
 export default Screen;
