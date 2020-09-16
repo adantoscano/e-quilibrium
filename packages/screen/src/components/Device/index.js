@@ -1,47 +1,55 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Peer from 'simple-peer';
 import { Button, Form, TextArea } from 'semantic-ui-react'
 
-function Device() {
-  const [offer, setOffer] = useState('');
-  const [answer, setAnswer] = useState('');
+class Device extends React.Component {
+  constructor () {
+    super()
+    this.state = {
+      answer: '',
+      offer: '',
+      data: ''
+    }
 
-  const p = new Peer({
-    initiator: true,
-    trickle: false
-  })
+    this.peer = new Peer({
+      trickle: false
+    });
 
-  useEffect(() => {
+    this.peer.on('error', err => console.log('error', err))
 
-    p.on('error', err => console.log('error', err))
-
-    p.on('signal', data => {
+    this.peer.on('signal', data => {
       console.log('SIGNAL', JSON.stringify(data))
-      setAnswer(JSON.stringify(data))
+      this.setState({ answer: JSON.stringify(data)})
     })
 
-    p.on('connect', () => {
+    this.peer.on('connect', () => {
       console.log('CONNECT')
-      p.send('whatever' + Math.random())
+      this.peer.send('whatever' + Math.random())
     })
 
-    p.on('data', data => {
+    this.peer.on('data', data => {
       console.log('data: ' + data)
+      this.setState({data})
     })
-  }, [])
-
-  const handleSubmitOffer = () => {
-    p.signal(JSON.parse(offer))
   }
 
-  return (
-    <div>
-      {answer}
-      <Form>
-        <TextArea placeholder='paste de offer here' onChange={e=>setOffer(e.value)} />
-        <Button onClick={handleSubmitOffer}/>
-      </Form>
-    </div>);
+  handleSubmitOffer = () => {
+    console.log(this.state.offer);
+    this.peer.signal(JSON.parse(this.state.offer));
+  }
+
+  render() {
+    return (
+      <div>
+        {this.state.answer}
+        <Form>
+          <TextArea placeholder='paste de offer here' onChange={e=>this.setState({offer: e.target.value})} />
+          <Button onClick={this.handleSubmitOffer}/>
+        </Form>
+        {this.state.data}
+      </div>
+    );
+  }
 }
 
 export default Device;

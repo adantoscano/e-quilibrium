@@ -1,45 +1,56 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Peer from 'simple-peer';
 import { Button, Form, TextArea } from 'semantic-ui-react'
 
-function Screen() {
-  const [offer, setOffer] = useState('');
-  const [answer, setAnswer] = useState('');
+class Screen extends React.Component {
+  constructor () {
+    super()
+    this.state = {
+      answer: '',
+      offer: '',
+      data: ''
+    }
 
-  const p = new Peer({
-    initiator: true,
-    trickle: false
-  })
+    this.peer = new Peer({
+      initiator: true,
+      trickle: false
+    });
 
-  useEffect(() => {
+    this.peer.on('error', err => console.log('error', err))
 
-    p.on('error', err => console.log('error', err))
-
-    p.on('signal', data => {
+    this.peer.on('signal', data => {
       console.log('SIGNAL', JSON.stringify(data))
-      setOffer(JSON.stringify(data))
+      this.setState({ offer: JSON.stringify(data)})
     })
 
-    p.on('connect', () => {
+    this.peer.on('connect', () => {
       console.log('CONNECT')
-      p.send('whatever' + Math.random())
+      this.peer.send('whatever' + Math.random())
     })
 
-    p.on('data', data => {
+    this.peer.on('data', data => {
       console.log('data: ' + data)
+      this.setState({data})
     })
-  },[])
-
-  const handleSubmitAnswer = () => {
-    p.signal(JSON.parse(answer))
   }
 
-return (<div>{offer}
-<Form>
-        <TextArea placeholder='paste answer here' onChange={e=>setAnswer(e.value)} />
-        <Button onClick={handleSubmitAnswer}/>
-      </Form>
-</div>);
+  handleSubmitAnswer = () => {
+    console.log(this.state.answer);
+    this.peer.signal(JSON.parse(this.state.answer));
+  }
+
+  render() {
+    return (
+      <div>
+        {this.state.offer}
+        <Form>
+          <TextArea placeholder='paste de answer here' onChange={e=>this.setState({answer: e.target.value})} />
+          <Button onClick={this.handleSubmitAnswer}/>
+        </Form>
+        {this.state.data}
+      </div>
+    );
+  }
 }
 
 export default Screen;
