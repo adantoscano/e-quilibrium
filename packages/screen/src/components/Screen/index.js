@@ -29,7 +29,7 @@ class Screen extends React.Component {
     })
 
     this.peer.on('data', data => {
-      console.log('data: ' + data)
+      console.log(data)
       this.setState({data})
     })
   }
@@ -47,7 +47,7 @@ class Screen extends React.Component {
           <TextArea placeholder='paste de answer here' onChange={e=>this.setState({answer: e.target.value})} />
           <Button onClick={this.handleSubmitAnswer}/>
         </Form>
-        {this.state.data}
+        {this.state.data.toString()}
       </div>
     );
   }

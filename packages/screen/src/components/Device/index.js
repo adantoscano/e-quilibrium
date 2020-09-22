@@ -46,7 +46,7 @@ class Device extends React.Component {
           <TextArea placeholder='paste de offer here' onChange={e=>this.setState({offer: e.target.value})} />
           <Button onClick={this.handleSubmitOffer}/>
         </Form>
-        {this.state.data}
+        {this.state.data.toString()}
       </div>
     );
   }
