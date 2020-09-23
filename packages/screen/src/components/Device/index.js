@@ -52,7 +52,7 @@ class Device extends React.Component {
 
     this.peer.on('data', data => {
       console.log('data: ' + data)
-      this.setState({ data })
+      this.setState({data: JSON.stringify(data)})
     })
   }
 
