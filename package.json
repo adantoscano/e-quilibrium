@@ -6,6 +6,7 @@
     "start": "lerna run start --parallel"
   },
   "devDependencies": {
+    "heroku": "^7.43.2",
     "lerna": "^3.22.1"
   }
 }
