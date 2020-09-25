@@ -2,6 +2,7 @@ import React from 'react';
 import Peer from 'simple-peer';
 import { Button, Form, TextArea } from 'semantic-ui-react';
 import { Gyroscope } from 'motion-sensors-polyfill';
+import axios from 'axios';
 
 class Device extends React.Component {
   constructor() {
@@ -37,12 +38,15 @@ class Device extends React.Component {
     this.peer = new Peer({
       trickle: false
     });
+  }
 
+  componentDidMount() {
     this.peer.on('error', err => console.log('error', err))
 
-    this.peer.on('signal', data => {
+    this.peer.on('signal', async data => {
       console.log('SIGNAL', JSON.stringify(data))
-      this.setState({ answer: JSON.stringify(data) })
+      const res = await axios.post(this.state.offer, data);
+      this.setState({ answer: res.data })
     })
 
     this.peer.on('connect', () => {
@@ -56,9 +60,11 @@ class Device extends React.Component {
     })
   }
 
-  handleSubmitOffer = () => {
+  handleSubmitOffer = async() => {
     console.log(this.state.offer);
-    this.peer.signal(JSON.parse(this.state.offer));
+    const res = await axios(this.state.offer);
+    console.log(res.data);
+    this.peer.signal(res.data.offer);
   }
 
   render() {

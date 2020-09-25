@@ -1,6 +1,7 @@
 import React from 'react';
 import Peer from 'simple-peer';
-import { Button, Form, TextArea } from 'semantic-ui-react'
+import { Button, Form, TextArea } from 'semantic-ui-react';
+import axios from 'axios';
 
 class Screen extends React.Component {
   constructor () {
@@ -17,12 +18,17 @@ class Screen extends React.Component {
       initiator: true,
       trickle: false
     });
+  }
 
+  componentDidMount() {
     this.peer.on('error', err => console.log('error', err))
 
-    this.peer.on('signal', data => {
+    this.peer.on('signal', async data => {
       console.log('SIGNAL', JSON.stringify(data))
-      this.setState({ offer: JSON.stringify(data)})
+      const res = await axios.post('http://localhost:3000/', data);
+      console.log('SIGNAL', JSON.stringify(res))
+      this.setState({ offer: res.data })
+      this.getServerAnswer();
     })
 
     this.peer.on('connect', () => {
@@ -34,6 +40,14 @@ class Screen extends React.Component {
       console.log('dataReceived: ' + dataReceived)
       this.setState({dataReceived})
     })
+  }
+
+  getServerAnswer = async () => {
+    console.log('Getting');
+    const res = await axios(this.state.offer);
+    res.data && res.data.answer ?
+      this.peer.signal(res.data.answer) :
+      setTimeout(() => this.getServerAnswer(), 1000); 
   }
 
   handleSubmitAnswer = () => {
@@ -49,8 +63,12 @@ class Screen extends React.Component {
   render() {
     return (
       <div>
+        <div>
         {this.state.isConnected ? 'CONNECTED' : 'OFFLINE'}
+        </div>
+        <div>
         {this.state.offer}
+        </div>
         <Form>
           <TextArea placeholder='paste de answer here' onChange={e=>this.setState({answer: e.target.value})} />
           <Button onClick={this.handleSubmitAnswer}/>
