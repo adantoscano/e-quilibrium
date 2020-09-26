@@ -2,6 +2,7 @@ import React from 'react';
 import Peer from 'simple-peer';
 import { Button, Form, TextArea } from 'semantic-ui-react';
 import { Gyroscope } from 'motion-sensors-polyfill';
+import QrReader from 'react-qr-reader'
 import axios from 'axios';
 
 class Device extends React.Component {
@@ -11,6 +12,8 @@ class Device extends React.Component {
       answer: '',
       offer: '',
       data: '',
+      dataToSend: '',
+      qrData: '',
       gData: {
         x: 0,
         y: 0,
@@ -60,11 +63,20 @@ class Device extends React.Component {
     })
   }
 
-  handleSubmitOffer = async() => {
-    console.log(this.state.offer);
-    const res = await axios(this.state.offer);
-    console.log(res.data);
-    this.peer.signal(res.data.offer);
+  handleSubmitData = () => {
+    this.peer.send(this.state.dataToSend);
+  }
+
+  handleScan = data => {
+    if (data) {
+      this.setState({
+        qrData: data
+      })
+    }
+  }
+
+  handleError = err => {
+    console.error(err)
   }
 
   render() {
@@ -72,13 +84,20 @@ class Device extends React.Component {
       <div>
         {this.state.answer}
         <Form>
-          <TextArea placeholder='paste de offer here' onChange={e => this.setState({ offer: e.target.value })} />
-          <Button onClick={this.handleSubmitOffer} />
+          <TextArea placeholder='Send to Peer' onChange={e => this.setState({ dataToSend: e.target.value })} />
+          <Button onClick={this.handleSubmitData}/>
         </Form>
         {this.state.data.toString()}
         {this.state.gData.x}
         {this.state.gData.y}
         {this.state.gData.z}
+        {this.state.qrData}
+        <QrReader
+          delay={300}
+          onError={this.handleError}
+          onScan={this.handleScan}
+          style={{ width: '100%' }}
+        />
       </div>
     );
   }

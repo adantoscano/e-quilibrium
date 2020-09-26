@@ -26,8 +26,8 @@ class Screen extends React.Component {
     this.peer.on('signal', async data => {
       console.log('SIGNAL', JSON.stringify(data))
       const res = await axios.post('http://localhost:3000/', data);
-      console.log('SIGNAL', JSON.stringify(res))
-      this.setState({ offer: res.data })
+      console.log('SIGNAL', JSON.stringify(res));
+      this.setState({ offer: res.data });
       this.getServerAnswer();
     })
 
@@ -50,11 +50,6 @@ class Screen extends React.Component {
       setTimeout(() => this.getServerAnswer(), 1000); 
   }
 
-  handleSubmitAnswer = () => {
-    console.log(this.state.answer);
-    this.peer.signal(JSON.parse(this.state.answer));
-  }
-
   handleSubmitData = () => {
     console.log(this.state.answer);
     this.peer.send(this.state.dataToSend);
@@ -70,12 +65,10 @@ class Screen extends React.Component {
         {this.state.offer}
         </div>
         <Form>
-          <TextArea placeholder='paste de answer here' onChange={e=>this.setState({answer: e.target.value})} />
-          <Button onClick={this.handleSubmitAnswer}/>
           <TextArea placeholder='Send data to peer' onChange={e=>this.setState({dataToSend: e.target.value})} />
           <Button onClick={this.handleSubmitData}/>
         </Form>
-        {this.state.dataReceived}
+        {this.state.dataReceived.toString()}
       </div>
     );
   }
