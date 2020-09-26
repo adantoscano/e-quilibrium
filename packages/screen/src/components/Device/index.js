@@ -87,11 +87,11 @@ class Device extends React.Component {
           <TextArea placeholder='Send to Peer' onChange={e => this.setState({ dataToSend: e.target.value })} />
           <Button onClick={this.handleSubmitData}/>
         </Form>
-        {this.state.data.toString()}
-        {this.state.gData.x}
-        {this.state.gData.y}
-        {this.state.gData.z}
-        {this.state.qrData}
+        {this.state.data.toString()} <br />
+        {this.state.gData.x} <br />
+        {this.state.gData.y} <br />
+        {this.state.gData.z} <br />
+        {this.state.qrData} <br />
         <QrReader
           delay={300}
           onError={this.handleError}
