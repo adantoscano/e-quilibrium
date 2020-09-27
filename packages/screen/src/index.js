@@ -5,12 +5,24 @@ import * as serviceWorker from './serviceWorker';
 import './index.css';
 import 'semantic-ui-css/semantic.min.css';
 
+const rootEl = document.getElementById('root');
+
 ReactDOM.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
-  document.getElementById('root')
+  rootEl
 );
+
+if (module.hot) {
+  module.hot.accept('./App', () => {
+    const NextApp = require('./App').default
+    ReactDOM.render(
+      <NextApp />,
+      rootEl
+    )
+  })
+}
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
