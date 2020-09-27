@@ -1,7 +1,7 @@
 import React from 'react';
 import Peer from 'simple-peer';
 import { Button, Form, TextArea } from 'semantic-ui-react';
-import { Gyroscope } from 'motion-sensors-polyfill';
+import { AbsoluteOrientationSensor } from 'motion-sensors-polyfill';
 import QrReader from 'react-qr-reader'
 import axios from 'axios';
 
@@ -21,17 +21,14 @@ class Device extends React.Component {
       }
     }
 
-    this.gyroscope = new Gyroscope({ frequency: 60 });
+    this.gyroscope = new AbsoluteOrientationSensor({ frequency: 60, referenceFrame: 'device' });
 
     this.gyroscope.addEventListener('reading', () => {
-      console.log("Angular velocity along the X-axis " + this.gyroscope.x);
-      console.log("Angular velocity along the Y-axis " + this.gyroscope.y);
-      console.log("Angular velocity along the Z-axis " + this.gyroscope.z);
       this.setState({
         gData: {
-          x: this.gyroscope.x,
-          y: this.gyroscope.y,
-          z: this.gyroscope.z
+          x: this.gyroscope.quaternion[0],
+          y: this.gyroscope.quaternion[1],
+          z: this.gyroscope.quaternion[2]
         }
       })
     });
@@ -68,11 +65,12 @@ class Device extends React.Component {
   }
 
   handleScan = async data => {
-    if (data) {
+    if (!this.state.qrData && data) {
       this.setState({
         qrData: data
       })
-      this.peer.signal(await axios(data));
+      const res = await axios(data);
+      this.peer.signal(res.data.offer);
     }
   }
 
