@@ -48,7 +48,7 @@ class Device extends React.Component {
 
     this.peer.on('signal', async data => {
       console.log('SIGNAL', JSON.stringify(data))
-      const res = await axios.post(this.state.offer, data);
+      const res = await axios.post(this.state.qrData, data);
       this.setState({ answer: res.data })
     })
 
@@ -67,11 +67,12 @@ class Device extends React.Component {
     this.peer.send(this.state.dataToSend);
   }
 
-  handleScan = data => {
+  handleScan = async data => {
     if (data) {
       this.setState({
         qrData: data
       })
+      this.peer.signal(await axios(data));
     }
   }
 
@@ -87,11 +88,11 @@ class Device extends React.Component {
           <TextArea placeholder='Send to Peer' onChange={e => this.setState({ dataToSend: e.target.value })} />
           <Button onClick={this.handleSubmitData}/>
         </Form>
-        {this.state.data.toString()}
-        {this.state.gData.x}
-        {this.state.gData.y}
-        {this.state.gData.z}
-        {this.state.qrData}
+        {this.state.data.toString()} <br />
+        {this.state.gData.x} <br />
+        {this.state.gData.y} <br />
+        {this.state.gData.z} <br />
+        {this.state.qrData} <br />
         <QrReader
           delay={300}
           onError={this.handleError}

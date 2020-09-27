@@ -1,7 +1,10 @@
 import React from 'react';
 import Peer from 'simple-peer';
 import { Button, Form, TextArea } from 'semantic-ui-react';
+import QRCode from 'qrcode.react';
 import axios from 'axios';
+
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3000'
 
 class Screen extends React.Component {
   constructor () {
@@ -25,7 +28,7 @@ class Screen extends React.Component {
 
     this.peer.on('signal', async data => {
       console.log('SIGNAL', JSON.stringify(data))
-      const res = await axios.post('http://localhost:3000/', data);
+      const res = await axios.post(apiUrl, data);
       console.log('SIGNAL', JSON.stringify(res));
       this.setState({ offer: res.data });
       this.getServerAnswer();
@@ -64,6 +67,7 @@ class Screen extends React.Component {
         <div>
         {this.state.offer}
         </div>
+        {this.state.offer && <QRCode value= {this.state.offer}/>}
         <Form>
           <TextArea placeholder='Send data to peer' onChange={e=>this.setState({dataToSend: e.target.value})} />
           <Button onClick={this.handleSubmitData}/>
