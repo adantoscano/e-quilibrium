@@ -41,7 +41,7 @@ class Screen extends React.Component {
 
     this.peer.on('data', dataReceived => {
       console.log('dataReceived: ' + dataReceived)
-      this.setState({dataReceived})
+      this.setState({dataReceived: dataReceived.data})
     })
   }
 
@@ -72,7 +72,7 @@ class Screen extends React.Component {
           <TextArea placeholder='Send data to peer' onChange={e=>this.setState({dataToSend: e.target.value})} />
           <Button onClick={this.handleSubmitData}/>
         </Form>
-        {this.state.dataReceived.toString()}
+        {this.state.dataReceived}
       </div>
     );
   }

@@ -1,9 +1,10 @@
 import React from 'react';
 import Peer from 'simple-peer';
 import { Button, Form, TextArea } from 'semantic-ui-react';
-import { AbsoluteOrientationSensor } from 'motion-sensors-polyfill';
 import QrReader from 'react-qr-reader'
+import { Stage, Layer, Line, Text } from 'react-konva';
 import axios from 'axios';
+
 
 class Device extends React.Component {
   constructor() {
@@ -18,22 +19,27 @@ class Device extends React.Component {
         x: 0,
         y: 0,
         z: 0
-      }
+      },
+      points: []
     }
 
-    this.gyroscope = new AbsoluteOrientationSensor({ frequency: 60, referenceFrame: 'device' });
+    this.canvasHeight = 300
+    this.canvasWidth = 300
 
-    this.gyroscope.addEventListener('reading', () => {
+    this.handleOrientation = event => {
+      const { absolute, alpha, beta, gamma } = event;
+      console.log({ absolute, alpha, beta, gamma })
+      const x = parseFloat(gamma).toPrecision(5);
+      const y = parseFloat(beta).toPrecision(5);
       this.setState({
         gData: {
-          x: this.gyroscope.quaternion[0],
-          y: this.gyroscope.quaternion[1],
-          z: this.gyroscope.quaternion[2]
-        }
+          x,
+          y
+        },
+        points: [...this.state.points, parseFloat(x)+(this.canvasHeight/2), parseFloat(y)+(this.canvasWidth/2)]
       })
-    });
-
-    this.gyroscope.start();
+      console.log(this.state.points);
+    }
 
     this.peer = new Peer({
       trickle: false
@@ -41,6 +47,8 @@ class Device extends React.Component {
   }
 
   componentDidMount() {
+    window.addEventListener('deviceorientation', this.handleOrientation, true);
+
     this.peer.on('error', err => console.log('error', err))
 
     this.peer.on('signal', async data => {
@@ -51,7 +59,7 @@ class Device extends React.Component {
 
     this.peer.on('connect', () => {
       console.log('CONNECT')
-      this.peer.send('whatever' + Math.random())
+      this.sendOrientation();
     })
 
     this.peer.on('data', data => {
@@ -78,9 +86,30 @@ class Device extends React.Component {
     console.error(err)
   }
 
+  sendOrientation = () => {
+    this.gyroscope.addEventListener('reading', () => {
+      this.peer.send(this.gyroscope.quaternion);
+    });
+  }
+
   render() {
     return (
       <div>
+        <Stage
+        height={this.canvasHeight}
+        width={this.canvasWidth}
+      >
+        <Layer>
+          <Text text="Just start drawing" x={5} y={30} />
+            <Line
+              points={this.state.points}
+              stroke="#df4b26"
+              strokeWidth={5}
+              tension={0.5}
+              lineCap="round"
+            />
+        </Layer>
+      </Stage>
         {this.state.answer}
         <Form>
           <TextArea placeholder='Send to Peer' onChange={e => this.setState({ dataToSend: e.target.value })} />
