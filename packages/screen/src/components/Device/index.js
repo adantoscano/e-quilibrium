@@ -51,9 +51,18 @@ class Device extends React.Component {
       console.log(this.state.points);
     }
 
+    this.handleError = err => {
+      console.error(err)
+    }
+     
     this.peer = new Peer({
       trickle: false
     });
+
+    this.sendOrientation = event => {
+      const { beta, gamma } = event;
+      this.peer.send([gamma, beta]);
+    }
   }
 
   componentDidMount() {
@@ -69,7 +78,7 @@ class Device extends React.Component {
 
     this.peer.on('connect', () => {
       console.log('CONNECT')
-      this.sendOrientation();
+      window.addEventListener('deviceorientation', this.sendOrientation, true);
     })
 
     this.peer.on('data', data => {
@@ -90,16 +99,6 @@ class Device extends React.Component {
       const res = await axios(data);
       this.peer.signal(res.data.offer);
     }
-  }
-
-  handleError = err => {
-    console.error(err)
-  }
-
-  sendOrientation = () => {
-    this.gyroscope.addEventListener('reading', () => {
-      this.peer.send(this.gyroscope.quaternion);
-    });
   }
 
   render() {

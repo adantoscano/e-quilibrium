@@ -40,8 +40,8 @@ class Screen extends React.Component {
     })
 
     this.peer.on('data', dataReceived => {
-      console.log('dataReceived: ' + dataReceived)
-      this.setState({dataReceived: dataReceived.data})
+      console.log(`dataReceived: ${dataReceived}`)
+      this.setState({dataReceived})
     })
   }
 
