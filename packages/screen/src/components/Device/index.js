@@ -23,21 +23,31 @@ class Device extends React.Component {
       points: []
     }
 
-    this.canvasHeight = 300
-    this.canvasWidth = 300
+    this.canvasHeight = window.innerWidth
+    this.canvasWidth = window.innerWidth
 
     this.handleOrientation = event => {
       const { absolute, alpha, beta, gamma } = event;
       console.log({ absolute, alpha, beta, gamma })
       const x = parseFloat(gamma).toPrecision(5);
       const y = parseFloat(beta).toPrecision(5);
-      this.setState({
-        gData: {
-          x,
-          y
-        },
-        points: [...this.state.points, parseFloat(x)+(this.canvasHeight/2), parseFloat(y)+(this.canvasWidth/2)]
-      })
+      const canvasCenterX = this.canvasHeight/2;
+      const canvasCenterY = this.canvasWidth/2;
+      const canvasX = Math.abs(x) <= 90 ? parseInt(x*(this.canvasHeight/180)+(canvasCenterX)) : null;
+      const canvasY = Math.abs(y) <= 90 ? parseInt(y*(this.canvasWidth/180)+(canvasCenterY)) : null;
+      console.log(`canvasHeight: ${this.canvasHeight}`);
+      console.log(`canvasWisth: ${this.canvasWidth}`);
+      console.log(`canvasX: ${canvasX}`);
+      console.log(`canvasY: ${canvasY}`);
+      if (canvasX && canvasY){
+        this.setState({
+          gData: {
+            x,
+            y
+          },
+          points: [...this.state.points, parseInt(canvasX), parseInt(canvasY)]
+        })
+      }
       console.log(this.state.points);
     }
 
