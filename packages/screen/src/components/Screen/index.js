@@ -16,7 +16,11 @@ class Screen extends React.Component {
       dataReceived: '',
       dataToSend: '',
       isConnected: false,
-      points: []
+      points: [],
+      gData: {
+        x: 0,
+        y: 0
+      },
     }
 
     this.peer = new Peer({
@@ -47,7 +51,9 @@ class Screen extends React.Component {
     this.peer.on('data', dataReceived => {
       console.log(`dataReceived: ${dataReceived}`)
       this.setState({ dataReceived })
-      const [gamma, beta] = dataReceived;
+      const [gamma, beta] = dataReceived.toString().split(',');
+      console.log(`gamma: ${gamma}`)
+      console.log(`beta: ${beta}`)
       const x = parseFloat(gamma).toPrecision(5);
       const y = parseFloat(beta).toPrecision(5);
       const canvasCenterX = this.canvasHeight/2;
@@ -112,7 +118,8 @@ class Screen extends React.Component {
           <TextArea placeholder='Send data to peer' onChange={e => this.setState({ dataToSend: e.target.value })} />
           <Button onClick={this.handleSubmitData} />
         </Form>
-        {this.state.dataReceived}
+        {this.state.gData.x} <br />
+        {this.state.gData.y} <br />
       </div>
     );
   }
