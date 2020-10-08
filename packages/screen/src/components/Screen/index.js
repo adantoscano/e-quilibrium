@@ -47,7 +47,7 @@ class Screen extends React.Component {
     this.peer.on('data', dataReceived => {
       console.log(`dataReceived: ${dataReceived}`)
       this.setState({ dataReceived })
-      const [gamma, beta] = dataReceived;
+      const [gamma, beta] = dataReceived.toString().split(',');
       const x = parseFloat(gamma).toPrecision(5);
       const y = parseFloat(beta).toPrecision(5);
       const canvasCenterX = this.canvasHeight/2;
