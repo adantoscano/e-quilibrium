@@ -2,8 +2,9 @@ import React from 'react';
 import Peer from 'simple-peer';
 import { Button, Form, TextArea } from 'semantic-ui-react';
 import QrReader from 'react-qr-reader'
-import { Stage, Layer, Line, Circle } from 'react-konva';
 import axios from 'axios';
+
+import Radar from '../Radar';
 
 
 class Device extends React.Component {
@@ -105,25 +106,7 @@ class Device extends React.Component {
   render() {
     return (
       <div>
-        <Stage
-        height={this.canvasHeight}
-        width={this.canvasWidth}
-      >
-        <Layer>
-          <Line
-            points={this.state.points}
-            stroke="#df4b26"
-            strokeWidth={5}
-            tension={0.5}
-            lineCap="round"
-          />
-          <Circle x={this.canvasWidth/2} y={this.canvasHeight/2} stroke="black" radius={this.maxRadius} />
-          <Circle x={this.canvasWidth/2} y={this.canvasHeight/2} stroke="black" radius={this.maxRadius/4*3} />
-          <Circle x={this.canvasWidth/2} y={this.canvasHeight/2} stroke="black" radius={this.maxRadius/2} />
-          <Circle x={this.canvasWidth/2} y={this.canvasHeight/2} stroke="black" radius={this.maxRadius/4} />
-          <Circle x={this.canvasWidth/2} y={this.canvasHeight/2} stroke="black" radius={1} />
-        </Layer>
-      </Stage>
+        <Radar points={this.state.points} />
         {this.state.answer}
         <Form>
           <TextArea placeholder='Send to Peer' onChange={e => this.setState({ dataToSend: e.target.value })} />
