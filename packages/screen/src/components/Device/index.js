@@ -2,7 +2,7 @@ import React from 'react';
 import Peer from 'simple-peer';
 import { Button, Form, TextArea } from 'semantic-ui-react';
 import QrReader from 'react-qr-reader'
-import { Stage, Layer, Line, Text } from 'react-konva';
+import { Stage, Layer, Line, Circle } from 'react-konva';
 import axios from 'axios';
 
 
@@ -23,8 +23,9 @@ class Device extends React.Component {
       points: []
     }
 
-    this.canvasHeight = window.innerWidth
-    this.canvasWidth = window.innerWidth
+    this.canvasHeight = window.innerWidth;
+    this.canvasWidth = window.innerWidth;
+    this.maxRadius = Math.min(this.canvasWidth, this.canvasHeight)/2;
 
     this.handleOrientation = event => {
       const { absolute, alpha, beta, gamma } = event;
@@ -54,7 +55,7 @@ class Device extends React.Component {
     this.handleError = err => {
       console.error(err)
     }
-     
+
     this.peer = new Peer({
       trickle: false
     });
@@ -109,14 +110,18 @@ class Device extends React.Component {
         width={this.canvasWidth}
       >
         <Layer>
-          <Text text="Just start drawing" x={5} y={30} />
-            <Line
-              points={this.state.points}
-              stroke="#df4b26"
-              strokeWidth={5}
-              tension={0.5}
-              lineCap="round"
-            />
+          <Line
+            points={this.state.points}
+            stroke="#df4b26"
+            strokeWidth={5}
+            tension={0.5}
+            lineCap="round"
+          />
+          <Circle x={this.canvasWidth/2} y={this.canvasHeight/2} stroke="black" radius={this.maxRadius} />
+          <Circle x={this.canvasWidth/2} y={this.canvasHeight/2} stroke="black" radius={this.maxRadius/4*3} />
+          <Circle x={this.canvasWidth/2} y={this.canvasHeight/2} stroke="black" radius={this.maxRadius/2} />
+          <Circle x={this.canvasWidth/2} y={this.canvasHeight/2} stroke="black" radius={this.maxRadius/4} />
+          <Circle x={this.canvasWidth/2} y={this.canvasHeight/2} stroke="black" radius={1} />
         </Layer>
       </Stage>
         {this.state.answer}
