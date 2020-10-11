@@ -94,7 +94,11 @@ class Screen extends React.Component {
         <div>
           {this.state.isConnected ? 'CONNECTED' : 'OFFLINE'}
         </div>
-        <Radar points={this.state.points} size={this.radarSize} />
+        <Radar 
+          x={this.state.points[this.state.points.length - 2]}
+          y={this.state.points[this.state.points.length - 1]}
+          points={this.state.points}
+          size={this.radarSize} />
         <div>
           {this.state.offer}
         </div>

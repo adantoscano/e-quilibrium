@@ -17,6 +17,7 @@ export default function Radar(props) {
         tension={0.5}
         lineCap="round"
       />
+      <Circle x={props.x} y={props.y} stroke="green" radius={maxRadius/25} />
       <Circle x={canvasSize/2} y={canvasSize/2} stroke="black" radius={maxRadius} />
       <Circle x={canvasSize/2} y={canvasSize/2} stroke="black" radius={maxRadius/4*3} />
       <Circle x={canvasSize/2} y={canvasSize/2} stroke="black" radius={maxRadius/2} />

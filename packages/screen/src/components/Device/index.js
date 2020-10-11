@@ -104,7 +104,11 @@ class Device extends React.Component {
   render() {
     return (
       <div>
-        <Radar points={this.state.points} size={this.radarSize} />
+        <Radar
+          x={this.state.points[this.state.points.length - 2]}
+          y={this.state.points[this.state.points.length - 1]}
+          points={this.state.points}
+          size={this.radarSize} />
         {this.state.answer}
         <Form>
           <TextArea placeholder='Send to Peer' onChange={e => this.setState({ dataToSend: e.target.value })} />
