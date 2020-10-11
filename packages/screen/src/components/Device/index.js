@@ -2,8 +2,9 @@ import React from 'react';
 import Peer from 'simple-peer';
 import { Button, Form, TextArea } from 'semantic-ui-react';
 import QrReader from 'react-qr-reader'
-import { Stage, Layer, Line, Text } from 'react-konva';
 import axios from 'axios';
+
+import Radar from '../Radar';
 
 
 class Device extends React.Component {
@@ -23,20 +24,19 @@ class Device extends React.Component {
       points: []
     }
 
-    this.canvasHeight = window.innerWidth
-    this.canvasWidth = window.innerWidth
+    this.radarSize = Math.min(window.innerHeight, window.innerWidth);
 
     this.handleOrientation = event => {
       const { absolute, alpha, beta, gamma } = event;
       console.log({ absolute, alpha, beta, gamma })
       const x = parseFloat(gamma).toPrecision(5);
       const y = parseFloat(beta).toPrecision(5);
-      const canvasCenterX = this.canvasHeight/2;
-      const canvasCenterY = this.canvasWidth/2;
-      const canvasX = Math.abs(x) <= 90 ? parseInt(x*(this.canvasHeight/180)+(canvasCenterX)) : null;
-      const canvasY = Math.abs(y) <= 90 ? parseInt(y*(this.canvasWidth/180)+(canvasCenterY)) : null;
-      console.log(`canvasHeight: ${this.canvasHeight}`);
-      console.log(`canvasWisth: ${this.canvasWidth}`);
+      const canvasCenterX = this.radarSize/2;
+      const canvasCenterY = this.radarSize/2;
+      const canvasX = Math.abs(x) <= 90 ? parseInt(x*(this.radarSize/180)+(canvasCenterX)) : null;
+      const canvasY = Math.abs(y) <= 90 ? parseInt(y*(this.radarSize/180)+(canvasCenterY)) : null;
+      console.log(`canvasHeight: ${this.radarSize}`);
+      console.log(`canvasWisth: ${this.radarSize}`);
       console.log(`canvasX: ${canvasX}`);
       console.log(`canvasY: ${canvasY}`);
       if (canvasX && canvasY){
@@ -54,7 +54,7 @@ class Device extends React.Component {
     this.handleError = err => {
       console.error(err)
     }
-     
+
     this.peer = new Peer({
       trickle: false
     });
@@ -104,21 +104,7 @@ class Device extends React.Component {
   render() {
     return (
       <div>
-        <Stage
-        height={this.canvasHeight}
-        width={this.canvasWidth}
-      >
-        <Layer>
-          <Text text="Just start drawing" x={5} y={30} />
-            <Line
-              points={this.state.points}
-              stroke="#df4b26"
-              strokeWidth={5}
-              tension={0.5}
-              lineCap="round"
-            />
-        </Layer>
-      </Stage>
+        <Radar points={this.state.points} size={this.radarSize} />
         {this.state.answer}
         <Form>
           <TextArea placeholder='Send to Peer' onChange={e => this.setState({ dataToSend: e.target.value })} />
