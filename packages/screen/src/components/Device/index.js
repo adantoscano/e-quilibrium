@@ -1,6 +1,6 @@
 import React from 'react';
 import Peer from 'simple-peer';
-import { Button, Form, TextArea } from 'semantic-ui-react';
+import { Button, Input } from 'semantic-ui-react';
 import QrReader from 'react-qr-reader'
 import axios from 'axios';
 
@@ -20,14 +20,15 @@ class Device extends React.Component {
         x: 0,
         y: 0
       },
-      points: []
+      points: [],
+      timerCount: 0
     }
 
     this.radarSize = Math.min(window.innerHeight, window.innerWidth);
 
     this.getPointer = event => {
       const { beta, gamma } = event;
-      const {x, y} = this.parseDegreesToCanvas(gamma, beta);
+      const { x, y } = this.parseDegreesToCanvas(gamma, beta);
       if (x && y) {
         this.setState({
           orientation: {
@@ -89,16 +90,27 @@ class Device extends React.Component {
   }
 
   handleStartMeasure = () => {
+    if (parseInt(this.state.timerCount) > 0) {
+      const initialTimer = this.state.timerCount;
+      const interval = setInterval(() => {
+        this.setState({ timerCount: this.state.timerCount - 1 })
+        if (this.state.timerCount <= 0) {
+          this.handleStopMeasure();
+          this.setState({ timerCount: initialTimer })
+          clearInterval(interval);
+        }
+      }, 1000);
+    }
     window.addEventListener('deviceorientation', this.startMeasure, true);
   }
 
   handleStopMeasure = () => {
     window.removeEventListener('deviceorientation', this.startMeasure, true);
   }
-  
+
   startMeasure = event => {
     const { beta, gamma } = event;
-    const {x, y} = this.parseDegreesToCanvas(gamma, beta);
+    const { x, y } = this.parseDegreesToCanvas(gamma, beta);
     if (x && y) {
       this.setState({
         points: [...this.state.points, parseInt(x), parseInt(y)]
@@ -112,7 +124,7 @@ class Device extends React.Component {
     const canvasCenter = this.radarSize / 2;
     const canvasX = Math.abs(x) <= 90 ? parseInt(x * (this.radarSize / 180) + (canvasCenter)) : null;
     const canvasY = Math.abs(y) <= 90 ? parseInt(y * (this.radarSize / 180) + (canvasCenter)) : null;
-    return {x: canvasX, y: canvasY};
+    return { x: canvasX, y: canvasY };
   }
 
   render() {
@@ -125,10 +137,8 @@ class Device extends React.Component {
           size={this.radarSize} />
         <Button onClick={this.handleStartMeasure}>Start measure</Button>
         <Button onClick={this.handleStopMeasure}>Stop measure</Button>
-        <Form>
-          <TextArea placeholder='Send to Peer' onChange={e => this.setState({ dataToSend: e.target.value })} />
-          <Button onClick={this.handleSubmitData} />
-        </Form>
+        <Input placeholder='Time in seconds' onChange={e => this.setState({ timerCount: e.target.value })} />
+        {this.state.timerCount} <br />
         {this.state.orientation.x} <br />
         {this.state.orientation.y} <br />
         {this.state.qrData} <br />
