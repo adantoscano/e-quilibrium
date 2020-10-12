@@ -16,39 +16,26 @@ class Device extends React.Component {
       data: '',
       dataToSend: '',
       qrData: '',
-      gData: {
+      orientation: {
         x: 0,
-        y: 0,
-        z: 0
+        y: 0
       },
       points: []
     }
 
     this.radarSize = Math.min(window.innerHeight, window.innerWidth);
 
-    this.handleOrientation = event => {
-      const { absolute, alpha, beta, gamma } = event;
-      console.log({ absolute, alpha, beta, gamma })
-      const x = parseFloat(gamma).toPrecision(5);
-      const y = parseFloat(beta).toPrecision(5);
-      const canvasCenterX = this.radarSize/2;
-      const canvasCenterY = this.radarSize/2;
-      const canvasX = Math.abs(x) <= 90 ? parseInt(x*(this.radarSize/180)+(canvasCenterX)) : null;
-      const canvasY = Math.abs(y) <= 90 ? parseInt(y*(this.radarSize/180)+(canvasCenterY)) : null;
-      console.log(`canvasHeight: ${this.radarSize}`);
-      console.log(`canvasWisth: ${this.radarSize}`);
-      console.log(`canvasX: ${canvasX}`);
-      console.log(`canvasY: ${canvasY}`);
-      if (canvasX && canvasY){
+    this.getPointer = event => {
+      const { beta, gamma } = event;
+      const {x, y} = this.parseDegreesToCanvas(gamma, beta);
+      if (x && y) {
         this.setState({
-          gData: {
+          orientation: {
             x,
             y
-          },
-          points: [...this.state.points, parseInt(canvasX), parseInt(canvasY)]
+          }
         })
       }
-      console.log(this.state.points);
     }
 
     this.handleError = err => {
@@ -66,7 +53,7 @@ class Device extends React.Component {
   }
 
   componentDidMount() {
-    window.addEventListener('deviceorientation', this.handleOrientation, true);
+    window.addEventListener('deviceorientation', this.getPointer, true);
 
     this.peer.on('error', err => console.log('error', err))
 
@@ -83,7 +70,7 @@ class Device extends React.Component {
 
     this.peer.on('data', data => {
       console.log('data: ' + data)
-      this.setState({data: JSON.stringify(data)})
+      this.setState({ data: JSON.stringify(data) })
     })
   }
 
@@ -101,23 +88,49 @@ class Device extends React.Component {
     }
   }
 
+  handleStartMeasure = () => {
+    window.addEventListener('deviceorientation', this.startMeasure, true);
+  }
+
+  handleStopMeasure = () => {
+    window.removeEventListener('deviceorientation', this.startMeasure, true);
+  }
+  
+  startMeasure = event => {
+    const { beta, gamma } = event;
+    const {x, y} = this.parseDegreesToCanvas(gamma, beta);
+    if (x && y) {
+      this.setState({
+        points: [...this.state.points, parseInt(x), parseInt(y)]
+      })
+    }
+  }
+
+  parseDegreesToCanvas = (gamma, beta) => {
+    const x = parseFloat(gamma).toPrecision(5);
+    const y = parseFloat(beta).toPrecision(5);
+    const canvasCenter = this.radarSize / 2;
+    const canvasX = Math.abs(x) <= 90 ? parseInt(x * (this.radarSize / 180) + (canvasCenter)) : null;
+    const canvasY = Math.abs(y) <= 90 ? parseInt(y * (this.radarSize / 180) + (canvasCenter)) : null;
+    return {x: canvasX, y: canvasY};
+  }
+
   render() {
     return (
       <div>
         <Radar
-          x={this.state.points[this.state.points.length - 2]}
-          y={this.state.points[this.state.points.length - 1]}
+          x={this.state.orientation.x}
+          y={this.state.orientation.y}
           points={this.state.points}
           size={this.radarSize} />
-        {this.state.answer}
+        <Button onClick={this.handleStartMeasure}>Start measure</Button>
+        <Button onClick={this.handleStopMeasure}>Stop measure</Button>
         <Form>
           <TextArea placeholder='Send to Peer' onChange={e => this.setState({ dataToSend: e.target.value })} />
-          <Button onClick={this.handleSubmitData}/>
+          <Button onClick={this.handleSubmitData} />
         </Form>
-        {this.state.data.toString()} <br />
-        {this.state.gData.x} <br />
-        {this.state.gData.y} <br />
-        {this.state.gData.z} <br />
+        {this.state.orientation.x} <br />
+        {this.state.orientation.y} <br />
         {this.state.qrData} <br />
         <QrReader
           delay={300}
