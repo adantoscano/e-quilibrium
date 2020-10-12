@@ -137,6 +137,7 @@ class Device extends React.Component {
           size={this.radarSize} />
         <Button onClick={this.handleStartMeasure}>Start measure</Button>
         <Button onClick={this.handleStopMeasure}>Stop measure</Button>
+        <Button onClick={() => this.setState({ points: [] })}>Clear measure</Button>
         <Input placeholder='Time in seconds' onChange={e => this.setState({ timerCount: e.target.value })} />
         {this.state.timerCount} <br />
         {this.state.orientation.x} <br />
