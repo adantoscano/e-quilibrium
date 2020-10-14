@@ -21,7 +21,8 @@ class Device extends React.Component {
         y: 0
       },
       points: [],
-      timerCount: 0
+      timerCount: 0,
+      showQRScaner: false,
     }
 
     this.radarSize = Math.min(window.innerHeight, window.innerWidth);
@@ -54,6 +55,7 @@ class Device extends React.Component {
   }
 
   componentDidMount() {
+
     window.addEventListener('deviceorientation', this.getPointer, true);
 
     this.peer.on('error', err => console.log('error', err))
@@ -82,7 +84,8 @@ class Device extends React.Component {
   handleScan = async data => {
     if (!this.state.qrData && data) {
       this.setState({
-        qrData: data
+        qrData: data,
+        showQRScaner: false
       })
       const res = await axios(data);
       this.peer.signal(res.data.offer);
@@ -116,6 +119,7 @@ class Device extends React.Component {
         points: [...this.state.points, parseInt(x), parseInt(y)]
       })
     }
+
   }
 
   parseDegreesToCanvas = (gamma, beta) => {
@@ -130,6 +134,12 @@ class Device extends React.Component {
   render() {
     return (
       <div>
+        { this.state.showQRScaner && <QrReader
+          delay={300}
+          onError={this.handleError}
+          onScan={this.handleScan}
+          style={{ width: '100%' }}
+        /> }
         <Radar
           x={this.state.orientation.x}
           y={this.state.orientation.y}
@@ -138,17 +148,12 @@ class Device extends React.Component {
         <Button onClick={this.handleStartMeasure}>Start measure</Button>
         <Button onClick={this.handleStopMeasure}>Stop measure</Button>
         <Button onClick={() => this.setState({ points: [] })}>Clear measure</Button>
+        <Button onClick={() => this.setState({ showQRScaner: true })}>Connect with screen</Button>
         <Input placeholder='Time in seconds' onChange={e => this.setState({ timerCount: e.target.value })} />
         {this.state.timerCount} <br />
         {this.state.orientation.x} <br />
         {this.state.orientation.y} <br />
         {this.state.qrData} <br />
-        <QrReader
-          delay={300}
-          onError={this.handleError}
-          onScan={this.handleScan}
-          style={{ width: '100%' }}
-        />
       </div>
     );
   }
