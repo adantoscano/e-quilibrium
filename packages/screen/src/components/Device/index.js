@@ -22,7 +22,7 @@ class Device extends React.Component {
       },
       points: [],
       timerCount: 0,
-      showQRScaner: false,
+      showQRScanner: false,
     }
 
     this.radarSize = Math.min(window.innerHeight, window.innerWidth);
@@ -44,10 +44,6 @@ class Device extends React.Component {
       console.error(err)
     }
 
-    this.peer = new Peer({
-      trickle: false
-    });
-
     this.sendOrientation = event => {
       const { beta, gamma } = event;
       this.peer.send([gamma, beta]);
@@ -55,26 +51,7 @@ class Device extends React.Component {
   }
 
   componentDidMount() {
-
     window.addEventListener('deviceorientation', this.getPointer, true);
-
-    this.peer.on('error', err => console.log('error', err))
-
-    this.peer.on('signal', async data => {
-      console.log('SIGNAL', JSON.stringify(data))
-      const res = await axios.post(this.state.qrData, data);
-      this.setState({ answer: res.data })
-    })
-
-    this.peer.on('connect', () => {
-      console.log('CONNECT')
-      window.addEventListener('deviceorientation', this.sendOrientation, true);
-    })
-
-    this.peer.on('data', data => {
-      console.log('data: ' + data)
-      this.setState({ data: JSON.stringify(data) })
-    })
   }
 
   handleSubmitData = () => {
@@ -85,7 +62,7 @@ class Device extends React.Component {
     if (!this.state.qrData && data) {
       this.setState({
         qrData: data,
-        showQRScaner: false
+        showQRScanner: false
       })
       const res = await axios(data);
       this.peer.signal(res.data.offer);
@@ -111,6 +88,32 @@ class Device extends React.Component {
     window.removeEventListener('deviceorientation', this.startMeasure, true);
   }
 
+  handleShowQRScanner = () => {
+    this.peer = new Peer({
+      trickle: false
+    });
+
+    this.peer.on('error', err => console.log('error', err))
+
+    this.peer.on('signal', async data => {
+      console.log('SIGNAL', JSON.stringify(data))
+      const res = await axios.post(this.state.qrData, data);
+      this.setState({ answer: res.data })
+    })
+
+    this.peer.on('connect', () => {
+      console.log('CONNECT')
+      window.addEventListener('deviceorientation', this.sendOrientation, true);
+    })
+
+    this.peer.on('data', data => {
+      console.log('data: ' + data)
+      this.setState({ data: JSON.stringify(data) })
+    })
+
+    this.setState({ showQRScanner: true });
+  }
+
   startMeasure = event => {
     const { beta, gamma } = event;
     const { x, y } = this.parseDegreesToCanvas(gamma, beta);
@@ -134,7 +137,7 @@ class Device extends React.Component {
   render() {
     return (
       <div>
-        { this.state.showQRScaner && <QrReader
+        { this.state.showQRScanner && <QrReader
           delay={300}
           onError={this.handleError}
           onScan={this.handleScan}
@@ -148,7 +151,7 @@ class Device extends React.Component {
         <Button onClick={this.handleStartMeasure}>Start measure</Button>
         <Button onClick={this.handleStopMeasure}>Stop measure</Button>
         <Button onClick={() => this.setState({ points: [] })}>Clear measure</Button>
-        <Button onClick={() => this.setState({ showQRScaner: true })}>Connect with screen</Button>
+        <Button onClick={this.handleShowQRScanner}>Connect with screen</Button>
         <Input placeholder='Time in seconds' onChange={e => this.setState({ timerCount: e.target.value })} />
         {this.state.timerCount} <br />
         {this.state.orientation.x} <br />
