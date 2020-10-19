@@ -25,7 +25,8 @@ class App extends React.Component {
       points: [],
       timerCount: 0,
       showQRScanner: false,
-      isConnectedToPeer: false,
+      isConnectedToDevice: false,
+      isConnectedToHUD: false,
     }
 
     this.radarSize = Math.min(window.innerHeight, window.innerWidth);
@@ -59,7 +60,13 @@ class App extends React.Component {
   }
 
   componentDidUpdate() {
-
+    if(this.state.isConnectedToHUD) {
+      this.peer.send(JSON.stringify({
+        orientation: this.state.orientation,
+        points: this.state.points,
+        timerCount: this.state.timerCount
+      }))
+    }
   }
 
   handleScan = async data => {
@@ -106,12 +113,11 @@ class App extends React.Component {
     })
 
     this.peer.on('connect', () => {
-      console.log('CONNECT')
-      window.addEventListener('deviceorientation', this.sendOrientation, true);
+      console.log('CONNECT');
+      this.setState({isConnectedToHUD: true});
     })
 
     this.peer.on('data', data => {
-      console.log('data: ' + data)
       this.setState({ data: JSON.stringify(data) })
     })
 
@@ -136,24 +142,12 @@ class App extends React.Component {
 
     this.peer.on('connect', () => {
       console.log('CONNECT')
-      this.setState({ isConnectedToPeer: true })
+      this.setState({ isConnectedToDevice: true })
     })
 
     this.peer.on('data', dataReceived => {
-      console.log(`dataReceived: ${dataReceived}`)
-      this.setState({ dataReceived })
-      const [gamma, beta] = dataReceived.toString().split(',');
-      const x = parseFloat(gamma).toPrecision(5);
-      const y = parseFloat(beta).toPrecision(5);
-      if (x && y) {
-        this.setState({
-          orientation: {
-            x,
-            y
-          }
-        })
-      }
-    })
+      this.setState(JSON.parse(dataReceived.toString()));
+    });
   }
 
   getServerAnswer = async () => {
