@@ -25,13 +25,15 @@ class App extends React.Component {
       points: [],
       timerCount: 0,
       showQRScanner: false,
+      isConnectedToPeer: false,
     }
 
     this.radarSize = Math.min(window.innerHeight, window.innerWidth);
 
     this.getPointer = event => {
       const { beta, gamma } = event;
-      const { x, y } = this.parseDegreesToCanvas(gamma, beta);
+      const x = parseFloat(gamma).toPrecision(5);
+      const y = parseFloat(beta).toPrecision(5);
       if (x && y) {
         this.setState({
           orientation: {
@@ -54,6 +56,10 @@ class App extends React.Component {
 
   componentDidMount() {
     window.addEventListener('deviceorientation', this.getPointer, true);
+  }
+
+  componentDidUpdate() {
+
   }
 
   handleScan = async data => {
@@ -112,7 +118,7 @@ class App extends React.Component {
     this.setState({ showQRScanner: true });
   }
 
-  handleConnectDevice = () => {
+  handleConnectToDevice = () => {
     this.peer = new Peer({
       initiator: true,
       trickle: false
@@ -130,14 +136,15 @@ class App extends React.Component {
 
     this.peer.on('connect', () => {
       console.log('CONNECT')
-      this.setState({ isConnected: true })
+      this.setState({ isConnectedToPeer: true })
     })
 
     this.peer.on('data', dataReceived => {
       console.log(`dataReceived: ${dataReceived}`)
       this.setState({ dataReceived })
       const [gamma, beta] = dataReceived.toString().split(',');
-      const { x, y } = this.parseDegreesToCanvas(gamma, beta);
+      const x = parseFloat(gamma).toPrecision(5);
+      const y = parseFloat(beta).toPrecision(5);
       if (x && y) {
         this.setState({
           orientation: {
@@ -159,22 +166,14 @@ class App extends React.Component {
 
   startMeasure = event => {
     const { beta, gamma } = event;
-    const { x, y } = this.parseDegreesToCanvas(gamma, beta);
+    const x = parseFloat(gamma).toPrecision(5);
+    const y = parseFloat(beta).toPrecision(5);
     if (x && y) {
       this.setState({
         points: [...this.state.points, parseInt(x), parseInt(y)]
       })
     }
 
-  }
-
-  parseDegreesToCanvas = (gamma, beta) => {
-    const x = parseFloat(gamma).toPrecision(5);
-    const y = parseFloat(beta).toPrecision(5);
-    const canvasCenter = this.radarSize / 2;
-    const canvasX = Math.abs(x) <= 90 ? parseInt(x * (this.radarSize / 180) + (canvasCenter)) : null;
-    const canvasY = Math.abs(y) <= 90 ? parseInt(y * (this.radarSize / 180) + (canvasCenter)) : null;
-    return { x: canvasX, y: canvasY };
   }
 
   render() {
@@ -187,8 +186,8 @@ class App extends React.Component {
           style={{ width: '100%' }}
           /> }
         <Radar
-          x={this.state.orientation.x}
-          y={this.state.orientation.y}
+          pointerX={this.state.orientation.x}
+          pointerY={this.state.orientation.y}
           points={this.state.points}
           size={this.radarSize} />
         {this.state.offer && <QRCode value={this.state.offer} includeMargin/>}
@@ -196,7 +195,7 @@ class App extends React.Component {
         <Button onClick={this.handleStopMeasure}>Stop measure</Button>
         <Button onClick={() => this.setState({ points: [] })}>Clear measure</Button>
         <Button onClick={this.handleShowQRScanner}>Connect with screen</Button>
-        <Button onClick={this.handleConnectDevice}>Connect with device</Button>
+        <Button onClick={this.handleConnectToDevice}>Connect with device</Button>
         <Input placeholder='Time in seconds' onChange={e => this.setState({ timerCount: e.target.value })} />
         {this.state.timerCount} <br />
         {this.state.orientation.x} <br />
