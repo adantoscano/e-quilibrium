@@ -81,6 +81,11 @@ class App extends React.Component {
   }
 
   handleStartMeasure = () => {
+    if (this.state.isConnectedToDevice) {
+      this.peer.send(JSON.stringify({
+        startMeasure: true
+      }))
+    }
     if (parseInt(this.state.timerCount) > 0) {
       const initialTimer = this.state.timerCount;
       const interval = setInterval(() => {
@@ -97,6 +102,7 @@ class App extends React.Component {
 
   handleStopMeasure = () => {
     window.removeEventListener('deviceorientation', this.startMeasure, true);
+    this.setState({ startMeasure: false })
   }
 
   handleShowQRScanner = () => {
@@ -118,7 +124,10 @@ class App extends React.Component {
     })
 
     this.peer.on('data', data => {
-      this.setState({ data: JSON.stringify(data) })
+      const dataJson = JSON.parse(data.toString());
+      if(dataJson.startMeasure) {
+        this.handleStartMeasure();
+      }
     })
 
     this.setState({ showQRScanner: true });
