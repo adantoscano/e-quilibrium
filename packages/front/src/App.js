@@ -173,7 +173,7 @@ class App extends React.Component {
     const y = parseFloat(beta).toPrecision(5);
     if (x && y) {
       this.setState({
-        points: [...this.state.points, parseInt(x), parseInt(y)]
+        points: [...this.state.points, x, y]
       })
     }
 
