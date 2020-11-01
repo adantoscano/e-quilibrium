@@ -1,7 +1,7 @@
 {
   "name": "front",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.0.1",
+  "homepage": "http://adantoscano.github.io/e-quilibrium",
   "dependencies": {
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
@@ -13,7 +13,7 @@
     "react-dom": "^16.13.1",
     "react-konva": "^16.13.0-6",
     "react-qr-reader": "^2.2.1",
-    "react-scripts": "3.4.3",
+    "react-scripts": "^3.4.4",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^1.2.1",
     "simple-peer": "^9.6.2"
@@ -23,7 +23,9 @@
     "start:heroku": "REACT_APP_API_URL=https://e-quilibrium-api.herokuapp.com/ PORT=3031 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -39,5 +41,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "gh-pages": "^3.1.0"
   }
 }
