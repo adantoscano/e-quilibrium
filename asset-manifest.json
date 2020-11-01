@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.css": "/e-quilibrium/static/css/main.5ecd60fb.chunk.css",
+    "main.js": "/e-quilibrium/static/js/main.5144d49a.chunk.js",
+    "main.js.map": "/e-quilibrium/static/js/main.5144d49a.chunk.js.map",
+    "runtime-main.js": "/e-quilibrium/static/js/runtime-main.14fe7e2a.js",
+    "runtime-main.js.map": "/e-quilibrium/static/js/runtime-main.14fe7e2a.js.map",
+    "static/css/2.34ee978e.chunk.css": "/e-quilibrium/static/css/2.34ee978e.chunk.css",
+    "static/js/2.c289d8bd.chunk.js": "/e-quilibrium/static/js/2.c289d8bd.chunk.js",
+    "static/js/2.c289d8bd.chunk.js.map": "/e-quilibrium/static/js/2.c289d8bd.chunk.js.map",
+    "index.html": "/e-quilibrium/index.html",
+    "precache-manifest.fba0e2cd62bc5bf2d6132e3caa51ef20.js": "/e-quilibrium/precache-manifest.fba0e2cd62bc5bf2d6132e3caa51ef20.js",
+    "service-worker.js": "/e-quilibrium/service-worker.js",
+    "static/css/2.34ee978e.chunk.css.map": "/e-quilibrium/static/css/2.34ee978e.chunk.css.map",
+    "static/css/main.5ecd60fb.chunk.css.map": "/e-quilibrium/static/css/main.5ecd60fb.chunk.css.map",
+    "static/js/2.c289d8bd.chunk.js.LICENSE.txt": "/e-quilibrium/static/js/2.c289d8bd.chunk.js.LICENSE.txt",
+    "static/media/semantic.min.css": "/e-quilibrium/static/media/outline-icons.ef60a4f6.woff"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.14fe7e2a.js",
+    "static/css/2.34ee978e.chunk.css",
+    "static/js/2.c289d8bd.chunk.js",
+    "static/css/main.5ecd60fb.chunk.css",
+    "static/js/main.5144d49a.chunk.js"
+  ]
+}
