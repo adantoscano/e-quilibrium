@@ -27,6 +27,7 @@ class App extends React.Component {
       showQRScanner: false,
       isConnectedToDevice: false,
       isConnectedToHUD: false,
+      maxTilt: 45,
     }
 
     this.radarSize = Math.min(window.innerHeight, window.innerWidth);
@@ -176,7 +177,19 @@ class App extends React.Component {
         points: [...this.state.points, x, y]
       })
     }
+  }
 
+  handleGetMaxTilt = () => {
+    this.setState({ maxTilt: 0 });
+    window.addEventListener('deviceorientation', this.getMaxTilt, true);
+    setTimeout(() => window.removeEventListener('deviceorientation', this.getMaxTilt, true), 5000);
+  }
+
+  getMaxTilt = event => {
+    const { beta, gamma } = event;
+    const x = parseFloat(gamma).toPrecision(5);
+    const y = parseFloat(beta).toPrecision(5);
+    this.setState({ maxTilt: Math.max(this.state.maxTilt, Math.abs(x), Math.abs(y)) });
   }
 
   render() {
@@ -192,18 +205,21 @@ class App extends React.Component {
           pointerX={this.state.orientation.x}
           pointerY={this.state.orientation.y}
           points={this.state.points}
-          size={this.radarSize} />
+          size={this.radarSize}
+          maxTilt={this.state.maxTilt} />
         {this.state.offer && <QRCode value={this.state.offer} includeMargin/>}
         <Button onClick={this.handleStartMeasure}>Start measure</Button>
         <Button onClick={this.handleStopMeasure}>Stop measure</Button>
         <Button onClick={() => this.setState({ points: [] })}>Clear measure</Button>
         <Button onClick={this.handleShowQRScanner}>Connect with screen</Button>
         <Button onClick={this.handleConnectToDevice}>Connect with device</Button>
+        <Button onClick={this.handleGetMaxTilt}>Get max tilt</Button>
         <Input placeholder='Time in seconds' onChange={e => this.setState({ timerCount: e.target.value })} />
         {this.state.timerCount} <br />
         {this.state.orientation.x} <br />
         {this.state.orientation.y} <br />
         {this.state.qrData} <br />
+        {this.state.maxTilt} <br />
       </div>
     );
   }
