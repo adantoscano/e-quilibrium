@@ -1,24 +1,22 @@
 import React from 'react';
 import { Stage, Layer, Line, Circle } from 'react-konva';
 
-export default function Radar({size, points, pointerX, pointerY}) {
-  const canvasSize = size || window.innerWidth;
-  const maxRadius = canvasSize/2;
-  const maxDegree = 17;
+export default function Radar({size = window.innerWidth, points, pointerX, pointerY, maxTilt }) {
+  const maxRadius = size/2;
 
   function fixThreshold(degree) {
-    if (degree > maxDegree) return maxDegree;
-    if (degree < -maxDegree) return -maxDegree;
+    if (degree > maxTilt) return maxTilt;
+    if (degree < -maxTilt) return -maxTilt;
     return degree;
   }
 
   function degreesToCanvas(degree) {
-    return parseInt(fixThreshold(degree) * (canvasSize / (maxDegree*2)) + (canvasSize / 2))
+    return parseInt(fixThreshold(degree) * (size / (maxTilt*2)) + (size / 2));
   }
 
   return (<Stage
-    height={canvasSize}
-    width={canvasSize}
+    height={size}
+    width={size}
   >
     <Layer>
       <Line
@@ -27,13 +25,14 @@ export default function Radar({size, points, pointerX, pointerY}) {
         strokeWidth={5}
         tension={1}
         lineCap="round"
+        preventDefault={false}
       />
-      <Circle x={degreesToCanvas(pointerX)} y={degreesToCanvas(pointerY)} stroke="green" radius={maxRadius/25} />
-      <Circle x={canvasSize/2} y={canvasSize/2} stroke="black" radius={maxRadius} />
-      <Circle x={canvasSize/2} y={canvasSize/2} stroke="black" radius={maxRadius/4*3} />
-      <Circle x={canvasSize/2} y={canvasSize/2} stroke="black" radius={maxRadius/2} />
-      <Circle x={canvasSize/2} y={canvasSize/2} stroke="black" radius={maxRadius/4} />
-      <Circle x={canvasSize/2} y={canvasSize/2} stroke="black" radius={1} />
+      <Circle x={degreesToCanvas(pointerX)} y={degreesToCanvas(pointerY)} stroke="green" radius={maxRadius/25} preventDefault={false}/>
+      <Circle x={size/2} y={size/2} stroke="black" radius={maxRadius} preventDefault={false}/>
+      <Circle x={size/2} y={size/2} stroke="black" radius={maxRadius/4*3} preventDefault={false}/>
+      <Circle x={size/2} y={size/2} stroke="black" radius={maxRadius/2} preventDefault={false}/>
+      <Circle x={size/2} y={size/2} stroke="black" radius={maxRadius/4} preventDefault={false}/>
+      <Circle x={size/2} y={size/2} stroke="black" radius={1} preventDefault={false}/>
     </Layer>
   </Stage>)
 }
