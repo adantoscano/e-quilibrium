@@ -1,5 +1,4 @@
 import React from 'react';
-import {withRouter} from 'react-router-dom'
 import Peer from 'simple-peer';
 import { Button, Input } from 'semantic-ui-react';
 import QrReader from 'react-qr-reader'
@@ -8,9 +7,11 @@ import axios from 'axios';
 
 import Radar from '../Radar';
 
-class Device extends React.Component {
-  constructor(props) {
-    super(props)
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3000'
+
+class Screen extends React.Component {
+  constructor() {
+    super()
     this.state = {
       answer: '',
       offer: '',
@@ -133,7 +134,31 @@ class Device extends React.Component {
     this.setState({ showQRScanner: true });
   }
 
-  handleConnectToDevice = () => this.props.history.push('/screen')
+  handleConnectToDevice = () => {
+    this.peer = new Peer({
+      initiator: true,
+      trickle: false
+    });
+
+    this.peer.on('error', err => console.log('error', err))
+
+    this.peer.on('signal', async data => {
+      console.log('SIGNAL', JSON.stringify(data))
+      const res = await axios.post(apiUrl, data);
+      console.log('SIGNAL', JSON.stringify(res));
+      this.setState({ offer: res.data });
+      this.getServerAnswer();
+    })
+
+    this.peer.on('connect', () => {
+      console.log('CONNECT')
+      this.setState({ isConnectedToDevice: true })
+    })
+
+    this.peer.on('data', dataReceived => {
+      this.setState(JSON.parse(dataReceived.toString()));
+    });
+  }
 
   getServerAnswer = async () => {
     console.log('Getting');
@@ -200,4 +225,4 @@ class Device extends React.Component {
   }
 }
 
-export default withRouter(Device);
+export default Screen;
