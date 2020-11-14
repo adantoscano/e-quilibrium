@@ -44,15 +44,6 @@ class Device extends React.Component {
         })
       }
     }
-
-    this.handleError = err => {
-      console.error(err)
-    }
-
-    this.sendOrientation = event => {
-      const { beta, gamma } = event;
-      this.peer.send([gamma, beta]);
-    }
   }
 
   componentDidMount() {
@@ -69,12 +60,16 @@ class Device extends React.Component {
     }
   }
 
+  sendOrientation = event => {
+    const { beta, gamma } = event;
+    this.peer.send([gamma, beta]);
+  }
+
+  handleError = err => {
+    console.error(err)
+  }
+
   handleStartMeasure = () => {
-    if (this.state.isConnectedToDevice) {
-      this.peer.send(JSON.stringify({
-        startMeasure: true
-      }))
-    }
     if (parseInt(this.state.timerCount) > 0) {
       const initialTimer = this.state.timerCount;
       const interval = setInterval(() => {
@@ -89,9 +84,35 @@ class Device extends React.Component {
     window.addEventListener('deviceorientation', this.startMeasure, true);
   }
 
+  startMeasure = event => {
+    const { beta, gamma } = event;
+    const x = parseFloat(gamma).toPrecision(5);
+    const y = parseFloat(beta).toPrecision(5);
+    if (x && y) {
+      this.setState({
+        points: [...this.state.points, x, y]
+      })
+    }
+  }
+
   handleStopMeasure = () => {
     window.removeEventListener('deviceorientation', this.startMeasure, true);
     this.setState({ startMeasure: false })
+  }
+
+  handleClearMeasure = () => this.setState({ points: [] })
+
+  handleGetMaxTilt = () => {
+    this.setState({ maxTilt: 0 });
+    window.addEventListener('deviceorientation', this.getMaxTilt, true);
+    setTimeout(() => window.removeEventListener('deviceorientation', this.getMaxTilt, true), 5000);
+  }
+
+  getMaxTilt = event => {
+    const { beta, gamma } = event;
+    const x = parseFloat(gamma).toPrecision(5);
+    const y = parseFloat(beta).toPrecision(5);
+    this.setState({ maxTilt: Math.max(this.state.maxTilt, Math.abs(x), Math.abs(y)) });
   }
 
   handleShowQRScanner = () => {
@@ -119,8 +140,21 @@ class Device extends React.Component {
 
     this.peer.on('data', data => {
       const dataJson = JSON.parse(data.toString());
-      if(dataJson.startMeasure) {
-        this.handleStartMeasure();
+      switch (dataJson.run) {
+        case 'startMeasure':
+          this.handleStartMeasure();
+          break;
+        case 'stopMeasure':
+          this.handleStopMeasure();
+          break;
+        case 'getMaxTilt':
+          this.handleGetMaxTilt();
+          break;
+        case 'clearMeasure':
+          this.handleClearMeasure();
+          break;
+        default:
+          break;
       }
     })
 
@@ -148,30 +182,6 @@ class Device extends React.Component {
       setTimeout(() => this.getServerAnswer(), 1000);
   }
 
-  startMeasure = event => {
-    const { beta, gamma } = event;
-    const x = parseFloat(gamma).toPrecision(5);
-    const y = parseFloat(beta).toPrecision(5);
-    if (x && y) {
-      this.setState({
-        points: [...this.state.points, x, y]
-      })
-    }
-  }
-
-  handleGetMaxTilt = () => {
-    this.setState({ maxTilt: 0 });
-    window.addEventListener('deviceorientation', this.getMaxTilt, true);
-    setTimeout(() => window.removeEventListener('deviceorientation', this.getMaxTilt, true), 5000);
-  }
-
-  getMaxTilt = event => {
-    const { beta, gamma } = event;
-    const x = parseFloat(gamma).toPrecision(5);
-    const y = parseFloat(beta).toPrecision(5);
-    this.setState({ maxTilt: Math.max(this.state.maxTilt, Math.abs(x), Math.abs(y)) });
-  }
-
   render() {
     return (
       <div>
@@ -191,7 +201,7 @@ class Device extends React.Component {
         <Button onClick={this.handleStartMeasure}>Start measure</Button>
         <Button onClick={this.handleStopMeasure}>Stop measure</Button>
         <Button onClick={this.handleGetMaxTilt}>Get max tilt</Button>
-        <Button onClick={() => this.setState({ points: [] })}>Clear measure</Button>
+        <Button onClick={this.handleClearMeasure}>Clear measure</Button>
         <Input placeholder='Time in seconds' onChange={e => this.setState({ timerCount: e.target.value })} />
         <Button onClick={this.handleShowQRScanner}>Connect with screen</Button>
         <Button onClick={this.handleConnectToDevice}>Connect with device</Button>
@@ -199,6 +209,7 @@ class Device extends React.Component {
         {this.state.orientation.x} <br />
         {this.state.orientation.y} <br />
         {this.state.qrData} <br />
+        {this.state.data} <br />
         {this.state.maxTilt} <br />
       </div>
     );

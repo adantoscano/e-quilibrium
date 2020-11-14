@@ -109,6 +109,10 @@ class Screen extends React.Component {
       setTimeout(() => this.getServerAnswer(), 1000);
   }
 
+  handleSendRun(option) {
+    this.peer.send(JSON.stringify({ run: option }));
+  }
+
   render() {
     return (
       <div>
@@ -122,10 +126,10 @@ class Screen extends React.Component {
             points={this.state.points}
             size={this.radarSize}
             maxTilt={this.state.maxTilt} />
-          <Button onClick={this.handleStartMeasure}>Start measure</Button>
-          <Button onClick={this.handleStopMeasure}>Stop measure</Button>
-          <Button onClick={this.handleGetMaxTilt}>Get max tilt</Button>
-          <Button onClick={() => this.setState({ points: [] })}>Clear measure</Button>
+          <Button onClick={() => this.handleSendRun('startMeasure')}>Start measure</Button>
+          <Button onClick={() => this.handleSendRun('stopMeasure')}>Stop measure</Button>
+          <Button onClick={() => this.handleSendRun('getMaxTilt')}>Get max tilt</Button>
+          <Button onClick={() => this.handleSendRun('clearMearure')}>Clear measure</Button>
           <Input placeholder='Time in seconds' onChange={e => this.setState({ timerCount: e.target.value })} />
           <Button onClick={this.handleShowQRScanner}>Connect with screen</Button>
           <Button onClick={this.handleConnectToDevice}>Connect with device</Button>
