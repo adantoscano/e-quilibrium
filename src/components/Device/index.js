@@ -69,17 +69,6 @@ class Device extends React.Component {
     }
   }
 
-  handleScan = async data => {
-    if (!this.state.qrData && data) {
-      this.setState({
-        qrData: data,
-        showQRScanner: false
-      })
-      const res = await axios(data);
-      this.peer.signal(res.data.offer);
-    }
-  }
-
   handleStartMeasure = () => {
     if (this.state.isConnectedToDevice) {
       this.peer.send(JSON.stringify({
@@ -123,6 +112,11 @@ class Device extends React.Component {
       this.setState({isConnectedToHUD: true});
     })
 
+    this.peer.on('close', () => {
+      console.log('DISCONNECT');
+      this.setState({isConnectedToHUD: false});
+    })
+
     this.peer.on('data', data => {
       const dataJson = JSON.parse(data.toString());
       if(dataJson.startMeasure) {
@@ -131,6 +125,17 @@ class Device extends React.Component {
     })
 
     this.setState({ showQRScanner: true });
+  }
+
+  handleScan = async data => {
+    if(data) {
+      this.setState({
+        qrData: data,
+        showQRScanner: false
+      })
+      const res = await axios(data);
+      this.peer.signal(res.data.offer);
+    }
   }
 
   handleConnectToDevice = () => this.props.history.push('/screen')

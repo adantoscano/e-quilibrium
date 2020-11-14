@@ -76,6 +76,11 @@ class Screen extends React.Component {
       this.setState({ isConnectedToDevice: true })
     })
 
+    this.peer.on('close', () => {
+      console.log('DISCONNECT')
+      this.setState({ isConnectedToDevice: false })
+    })
+
     this.peer.on('data', dataReceived => {
       this.setState(JSON.parse(dataReceived.toString()));
     });
@@ -122,7 +127,7 @@ class Screen extends React.Component {
     const res = await axios(this.state.offer);
     res.data && res.data.answer ?
       this.peer.signal(res.data.answer) :
-      setTimeout(() => this.getServerAnswer(), 5000);
+      setTimeout(() => this.getServerAnswer(), 1000);
   }
 
   render() {
