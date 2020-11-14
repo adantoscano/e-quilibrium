@@ -56,34 +56,7 @@ class Screen extends React.Component {
   }
 
   componentDidMount() {
-    this.peer = new Peer({
-      initiator: true,
-      trickle: false
-    });
-
-    this.peer.on('error', err => console.log('error', err))
-
-    this.peer.on('signal', async data => {
-      console.log('SIGNAL', JSON.stringify(data))
-      const res = await axios.post(apiUrl, data);
-      console.log('SIGNAL', JSON.stringify(res));
-      this.setState({ offer: res.data });
-      this.getServerAnswer();
-    })
-
-    this.peer.on('connect', () => {
-      console.log('CONNECT')
-      this.setState({ isConnectedToDevice: true })
-    })
-
-    this.peer.on('close', () => {
-      console.log('DISCONNECT')
-      this.setState({ isConnectedToDevice: false })
-    })
-
-    this.peer.on('data', dataReceived => {
-      this.setState(JSON.parse(dataReceived.toString()));
-    });
+    this.handleConnectToDevice();
   }
 
   handleStartMeasure = () => {
@@ -115,6 +88,12 @@ class Screen extends React.Component {
     this.peer.on('connect', () => {
       console.log('CONNECT')
       this.setState({ isConnectedToDevice: true })
+    })
+
+    this.peer.on('close', () => {
+      console.log('DISCONNECT')
+      this.setState({ isConnectedToDevice: false })
+      this.handleConnectToDevice();
     })
 
     this.peer.on('data', dataReceived => {
