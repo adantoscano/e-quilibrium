@@ -55,14 +55,10 @@ class Device extends React.Component {
       this.peer.send(JSON.stringify({
         orientation: this.state.orientation,
         points: this.state.points,
-        timerCount: this.state.timerCount
+        timerCount: this.state.timerCount,
+        maxTilt: this.state.maxTilt
       }))
     }
-  }
-
-  sendOrientation = event => {
-    const { beta, gamma } = event;
-    this.peer.send([gamma, beta]);
   }
 
   handleError = err => {
