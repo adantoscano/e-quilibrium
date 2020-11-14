@@ -115,6 +115,8 @@ class Device extends React.Component {
     this.setState({ maxTilt: Math.max(this.state.maxTilt, Math.abs(x), Math.abs(y)) });
   }
 
+  handleChangeSeconds = e => this.setState({ timerCount: e.target.value });
+
   handleShowQRScanner = () => {
     this.peer = new Peer({
       trickle: false
@@ -152,6 +154,10 @@ class Device extends React.Component {
           break;
         case 'clearMeasure':
           this.handleClearMeasure();
+          break;
+        case 'changeTimer':
+          this.handleClearMeasure();
+          this.setState({timerCount: dataJson.runValue})
           break;
         default:
           break;
@@ -202,7 +208,7 @@ class Device extends React.Component {
         <Button onClick={this.handleStopMeasure}>Stop measure</Button>
         <Button onClick={this.handleGetMaxTilt}>Get max tilt</Button>
         <Button onClick={this.handleClearMeasure}>Clear measure</Button>
-        <Input placeholder='Time in seconds' onChange={e => this.setState({ timerCount: e.target.value })} />
+        <Input placeholder='Time in seconds' onChange={this.handleChangeSeconds} />
         <Button onClick={this.handleShowQRScanner}>Connect with screen</Button>
         <Button onClick={this.handleConnectToDevice}>Connect with device</Button>
         {this.state.timerCount} <br />

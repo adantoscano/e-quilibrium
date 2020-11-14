@@ -109,8 +109,8 @@ class Screen extends React.Component {
       setTimeout(() => this.getServerAnswer(), 1000);
   }
 
-  handleSendRun(option) {
-    this.peer.send(JSON.stringify({ run: option }));
+  handleSendRun(option, value) {
+    this.peer.send(JSON.stringify({ run: option, runValue: value }));
   }
 
   render() {
@@ -130,7 +130,7 @@ class Screen extends React.Component {
           <Button onClick={() => this.handleSendRun('stopMeasure')}>Stop measure</Button>
           <Button onClick={() => this.handleSendRun('getMaxTilt')}>Get max tilt</Button>
           <Button onClick={() => this.handleSendRun('clearMearure')}>Clear measure</Button>
-          <Input placeholder='Time in seconds' onChange={e => this.setState({ timerCount: e.target.value })} />
+          <Input placeholder='Time in seconds' onChange={e => this.handleSendRun('changeTimer', e.target.value)} />
           <Button onClick={this.handleShowQRScanner}>Connect with screen</Button>
           <Button onClick={this.handleConnectToDevice}>Connect with device</Button>
           {this.state.timerCount} <br />
