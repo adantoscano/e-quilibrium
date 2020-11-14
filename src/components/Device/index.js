@@ -112,7 +112,7 @@ class Device extends React.Component {
     const { beta, gamma } = event;
     const x = parseFloat(gamma).toPrecision(5);
     const y = parseFloat(beta).toPrecision(5);
-    this.setState({ maxTilt: Math.max(this.state.maxTilt, Math.abs(x), Math.abs(y)) });
+    this.setState({ maxTilt: Math.max(this.state.maxTilt, Math.sqrt(x*x+y*y)) });
   }
 
   handleChangeSeconds = e => this.setState({ timerCount: e.target.value });
