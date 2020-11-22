@@ -10,7 +10,7 @@ import Radar from '../Radar';
 
 class Device extends React.Component {
   constructor(props) {
-    super(props)
+    super();
     this.state = {
       answer: '',
       offer: '',
@@ -22,27 +22,31 @@ class Device extends React.Component {
         y: 0
       },
       points: [],
+      measureFrequency: 50,
       timerCount: 0,
       showQRScanner: false,
       isConnectedToDevice: false,
       isConnectedToHUD: false,
+      isRunningMeasure: false,
       maxTilt: 45,
     }
+  }
 
-    this.radarSize = Math.min(window.innerHeight, window.innerWidth);
+  radarSize = Math.min(window.innerHeight, window.innerWidth);
 
-    this.getPointer = event => {
-      const { beta, gamma } = event;
-      const x = parseFloat(gamma).toPrecision(5);
-      const y = parseFloat(beta).toPrecision(5);
-      if (x && y) {
-        this.setState({
-          orientation: {
-            x,
-            y
-          }
-        })
-      }
+  measureInterval = null;
+
+  getPointer = event => {
+    const { beta, gamma } = event;
+    const x = parseFloat(gamma).toPrecision(5);
+    const y = parseFloat(beta).toPrecision(5);
+    if (x && y) {
+      this.setState({
+        orientation: {
+          x,
+          y
+        }
+      })
     }
   }
 
@@ -66,34 +70,28 @@ class Device extends React.Component {
   }
 
   handleStartMeasure = () => {
+    this.setState({ isRunningMeasure: true })
     if (parseInt(this.state.timerCount) > 0) {
       const initialTimer = this.state.timerCount;
-      const interval = setInterval(() => {
+      const counterInterval = setInterval(() => {
         this.setState({ timerCount: this.state.timerCount - 1 })
         if (this.state.timerCount <= 0) {
           this.handleStopMeasure();
           this.setState({ timerCount: initialTimer })
-          clearInterval(interval);
+          clearInterval(counterInterval);
         }
       }, 1000);
     }
-    window.addEventListener('deviceorientation', this.startMeasure, true);
-  }
-
-  startMeasure = event => {
-    const { beta, gamma } = event;
-    const x = parseFloat(gamma).toPrecision(5);
-    const y = parseFloat(beta).toPrecision(5);
-    if (x && y) {
+    this.measureInterval = setInterval(() => {
       this.setState({
-        points: [...this.state.points, x, y]
+        points: [...this.state.points, this.state.orientation.x, this.state.orientation.y]
       })
-    }
+    }, parseInt(1000/this.state.measureFrequency));
   }
 
   handleStopMeasure = () => {
-    window.removeEventListener('deviceorientation', this.startMeasure, true);
-    this.setState({ startMeasure: false })
+    clearInterval(this.measureInterval);
+    this.setState({ isRunningMeasure: false })
   }
 
   handleClearMeasure = () => this.setState({ points: [] })
@@ -200,8 +198,9 @@ class Device extends React.Component {
           size={this.radarSize}
           maxTilt={this.state.maxTilt} />
         {this.state.offer && <QRCode value={this.state.offer} includeMargin/>}
-        <Button onClick={this.handleStartMeasure}>Start measure</Button>
-        <Button onClick={this.handleStopMeasure}>Stop measure</Button>
+        { this.state.isRunningMeasure
+          ? <Button fluid color='red' onClick={this.handleStopMeasure}>Stop measure</Button>
+          : <Button fluid color='green' onClick={this.handleStartMeasure}>Start measure</Button>}
         <Button onClick={this.handleGetMaxTilt}>Get max tilt</Button>
         <Button onClick={this.handleClearMeasure}>Clear measure</Button>
         <Input placeholder='Time in seconds' onChange={this.handleChangeSeconds} />
