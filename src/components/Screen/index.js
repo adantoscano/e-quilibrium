@@ -1,15 +1,17 @@
 import React from 'react';
+import { withRouter } from 'react-router-dom'
 import Peer from 'simple-peer';
-import { Button, Input } from 'semantic-ui-react';
+import { Container, Button, Input } from 'semantic-ui-react';
 import QRCode from 'qrcode.react';
 import axios from 'axios';
 
 import Radar from '../Radar';
+import Results from '../Results';
 
 const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3000'
 
 class Screen extends React.Component {
-  constructor() {
+  constructor(props) {
     super()
     this.state = {
       answer: '',
@@ -22,51 +24,20 @@ class Screen extends React.Component {
         y: 0
       },
       points: [],
+      measureFrequency: 50,
       timerCount: 0,
       showQRScanner: false,
+      showResults: false,
       isConnectedToDevice: false,
       isConnectedToHUD: false,
+      isRunningMeasure: false,
       maxTilt: 45,
     }
-
     this.radarSize = Math.min(window.innerHeight, window.innerWidth);
-
-    this.getPointer = event => {
-      const { beta, gamma } = event;
-      const x = parseFloat(gamma).toPrecision(5);
-      const y = parseFloat(beta).toPrecision(5);
-      if (x && y) {
-        this.setState({
-          orientation: {
-            x,
-            y
-          }
-        })
-      }
-    }
-
-    this.handleError = err => {
-      console.error(err)
-    }
-
-    this.sendOrientation = event => {
-      const { beta, gamma } = event;
-      this.peer.send([gamma, beta]);
-    }
   }
 
   componentDidMount() {
     this.handleConnectToDevice();
-  }
-
-  handleStartMeasure = () => {
-    this.peer.send(JSON.stringify({
-      startMeasure: true
-    }));
-  }
-
-  handleStopMeasure = () => {
-    this.setState({ startMeasure: false })
   }
 
   handleConnectToDevice = () => {
@@ -117,31 +88,42 @@ class Screen extends React.Component {
     return (
       <div>
         {!this.state.offer && <div> Generating data to sync... </div>}
-        {this.state.offer && !this.state.isConnectedToDevice && <QRCode value={this.state.offer} includeMargin/>}
+        {this.state.offer && !this.state.isConnectedToDevice && <Container><QRCode value={this.state.offer} includeMargin/></Container>}
         {this.state.isConnectedToDevice &&
           <div>
-          <Radar
-            pointerX={this.state.orientation.x}
-            pointerY={this.state.orientation.y}
+            <Radar
+              pointerX={this.state.orientation.x}
+              pointerY={this.state.orientation.y}
+              points={this.state.points}
+              size={this.radarSize}
+              maxTilt={this.state.maxTilt} />
+
+            <Container textAlign='center'>
+              { this.state.isRunningMeasure
+                ? <Button fluid color='red' onClick={() => this.handleSendRun('stopMeasure')}>Stop measure</Button>
+                : <Button fluid color='green' onClick={() => this.handleSendRun('startMeasure')}>Start measure</Button>
+              }
+              <Button onClick={() => this.handleSendRun('getMaxTilt')}>Get max tilt</Button>
+              <Button onClick={() => this.handleSendRun('clearMeasure')}>Clear measure</Button>
+              <Input placeholder='Time in seconds' onChange={e => this.handleSendRun('changeTimer', e.target.value)} />
+              <Button onClick={() => this.props.history.push('/')}>Connect with screen</Button>
+              {this.state.timerCount} <br />
+              {this.state.orientation.x} <br />
+              {this.state.orientation.y} <br />
+              {this.state.qrData} <br />
+              {this.state.maxTilt} <br />
+            </Container>
+            {this.state.showResults &&
+          <Results
+            close={() => this.handleSendRun('closeResults')}
             points={this.state.points}
-            size={this.radarSize}
-            maxTilt={this.state.maxTilt} />
-          <Button onClick={() => this.handleSendRun('startMeasure')}>Start measure</Button>
-          <Button onClick={() => this.handleSendRun('stopMeasure')}>Stop measure</Button>
-          <Button onClick={() => this.handleSendRun('getMaxTilt')}>Get max tilt</Button>
-          <Button onClick={() => this.handleSendRun('clearMearure')}>Clear measure</Button>
-          <Input placeholder='Time in seconds' onChange={e => this.handleSendRun('changeTimer', e.target.value)} />
-          <Button onClick={this.handleShowQRScanner}>Connect with screen</Button>
-          <Button onClick={this.handleConnectToDevice}>Connect with device</Button>
-          {this.state.timerCount} <br />
-          {this.state.orientation.x} <br />
-          {this.state.orientation.y} <br />
-          {this.state.qrData} <br />
-          {this.state.maxTilt} <br />
+            size={this.radarSize/2}
+            maxTilt={this.state.maxTilt}
+            />}
         </div>}
       </div>
     );
   }
 }
 
-export default Screen;
+export default withRouter(Screen);

@@ -1,19 +1,19 @@
 import React from 'react';
-import {withRouter} from 'react-router-dom'
+import { withRouter } from 'react-router-dom'
 import Peer from 'simple-peer';
-import { Button, Input } from 'semantic-ui-react';
+import { Button, Container, Input } from 'semantic-ui-react';
 import QrReader from 'react-qr-reader'
 import QRCode from 'qrcode.react';
 import axios from 'axios';
 
 import Radar from '../Radar';
+import Results from '../Results';
 
 class Device extends React.Component {
   constructor(props) {
     super();
     this.state = {
       answer: '',
-      offer: '',
       data: '',
       dataToSend: '',
       qrData: '',
@@ -25,7 +25,7 @@ class Device extends React.Component {
       measureFrequency: 50,
       timerCount: 0,
       showQRScanner: false,
-      isConnectedToDevice: false,
+      showResults: false,
       isConnectedToHUD: false,
       isRunningMeasure: false,
       maxTilt: 45,
@@ -56,12 +56,7 @@ class Device extends React.Component {
 
   componentDidUpdate() {
     if(this.state.isConnectedToHUD) {
-      this.peer.send(JSON.stringify({
-        orientation: this.state.orientation,
-        points: this.state.points,
-        timerCount: this.state.timerCount,
-        maxTilt: this.state.maxTilt
-      }))
+      this.peer.send(JSON.stringify(this.state))
     }
   }
 
@@ -91,7 +86,7 @@ class Device extends React.Component {
 
   handleStopMeasure = () => {
     clearInterval(this.measureInterval);
-    this.setState({ isRunningMeasure: false })
+    this.setState({ isRunningMeasure: false, showResults: true })
   }
 
   handleClearMeasure = () => this.setState({ points: [] })
@@ -150,8 +145,10 @@ class Device extends React.Component {
           this.handleClearMeasure();
           break;
         case 'changeTimer':
-          this.handleClearMeasure();
           this.setState({timerCount: dataJson.runValue})
+          break;
+        case 'closeResults':
+          this.setState({showResults: false})
           break;
         default:
           break;
@@ -172,46 +169,46 @@ class Device extends React.Component {
     }
   }
 
-  handleConnectToDevice = () => this.props.history.push('/screen')
-
-  getServerAnswer = async () => {
-    console.log('Getting');
-    const res = await axios(this.state.offer);
-    res.data && res.data.answer ?
-      this.peer.signal(res.data.answer) :
-      setTimeout(() => this.getServerAnswer(), 1000);
-  }
+  handleConnectToDevice = () => this.props.history.push('/screen');
 
   render() {
     return (
       <div>
-        { this.state.showQRScanner && <QrReader
-          delay={300}
-          onError={this.handleError}
-          onScan={this.handleScan}
-          style={{ width: '100%' }}
-          /> }
+      { this.state.showQRScanner && <QrReader
+        delay={300}
+        onError={this.handleError}
+        onScan={this.handleScan}
+        style={{ width: '100%' }}
+        /> }
         <Radar
           pointerX={this.state.orientation.x}
           pointerY={this.state.orientation.y}
           points={this.state.points}
           size={this.radarSize}
           maxTilt={this.state.maxTilt} />
-        {this.state.offer && <QRCode value={this.state.offer} includeMargin/>}
-        { this.state.isRunningMeasure
-          ? <Button fluid color='red' onClick={this.handleStopMeasure}>Stop measure</Button>
-          : <Button fluid color='green' onClick={this.handleStartMeasure}>Start measure</Button>}
-        <Button onClick={this.handleGetMaxTilt}>Get max tilt</Button>
-        <Button onClick={this.handleClearMeasure}>Clear measure</Button>
-        <Input placeholder='Time in seconds' onChange={this.handleChangeSeconds} />
-        <Button onClick={this.handleShowQRScanner}>Connect with screen</Button>
-        <Button onClick={this.handleConnectToDevice}>Connect with device</Button>
-        {this.state.timerCount} <br />
-        {this.state.orientation.x} <br />
-        {this.state.orientation.y} <br />
-        {this.state.qrData} <br />
-        {this.state.data} <br />
-        {this.state.maxTilt} <br />
+        <Container textAlign='center'>
+          { this.state.isRunningMeasure
+            ? <Button fluid color='red' onClick={this.handleStopMeasure}>Stop measure</Button>
+            : <Button fluid color='green' onClick={this.handleStartMeasure}>Start measure</Button>}
+          <Button onClick={this.handleGetMaxTilt}>Get max tilt</Button>
+          <Button onClick={this.handleClearMeasure}>Clear measure</Button>
+          <Input placeholder='Time in seconds' onChange={this.handleChangeSeconds} />
+          <Button onClick={this.handleShowQRScanner}>Connect with screen</Button>
+          <Button onClick={this.handleConnectToDevice}>Connect with device</Button>
+          {this.state.timerCount} <br />
+          {this.state.orientation.x} <br />
+          {this.state.orientation.y} <br />
+          {this.state.qrData} <br />
+          {this.state.data} <br />
+          {this.state.maxTilt} <br />
+        </Container>
+        {this.state.showResults &&
+          <Results
+            close={() => this.setState({showResults: false})}
+            points={this.state.points}
+            size={this.radarSize/2}
+            maxTilt={this.state.maxTilt}
+            />}
       </div>
     );
   }
