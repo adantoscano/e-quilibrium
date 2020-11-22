@@ -10,7 +10,7 @@ import Radar from '../Radar';
 
 class Device extends React.Component {
   constructor(props) {
-    super(props)
+    super();
     this.state = {
       answer: '',
       offer: '',
@@ -22,27 +22,31 @@ class Device extends React.Component {
         y: 0
       },
       points: [],
+      measure: [],
+      measureFrequency: 50,
       timerCount: 0,
       showQRScanner: false,
       isConnectedToDevice: false,
       isConnectedToHUD: false,
       maxTilt: 45,
     }
+  }
 
-    this.radarSize = Math.min(window.innerHeight, window.innerWidth);
+  radarSize = Math.min(window.innerHeight, window.innerWidth);
 
-    this.getPointer = event => {
-      const { beta, gamma } = event;
-      const x = parseFloat(gamma).toPrecision(5);
-      const y = parseFloat(beta).toPrecision(5);
-      if (x && y) {
-        this.setState({
-          orientation: {
-            x,
-            y
-          }
-        })
-      }
+  measureInterval = null;
+
+  getPointer = event => {
+    const { beta, gamma } = event;
+    const x = parseFloat(gamma).toPrecision(5);
+    const y = parseFloat(beta).toPrecision(5);
+    if (x && y) {
+      this.setState({
+        orientation: {
+          x,
+          y
+        }
+      })
     }
   }
 
@@ -68,16 +72,20 @@ class Device extends React.Component {
   handleStartMeasure = () => {
     if (parseInt(this.state.timerCount) > 0) {
       const initialTimer = this.state.timerCount;
-      const interval = setInterval(() => {
+      const counterInterval = setInterval(() => {
         this.setState({ timerCount: this.state.timerCount - 1 })
         if (this.state.timerCount <= 0) {
           this.handleStopMeasure();
           this.setState({ timerCount: initialTimer })
-          clearInterval(interval);
+          clearInterval(counterInterval);
         }
       }, 1000);
     }
-    window.addEventListener('deviceorientation', this.startMeasure, true);
+    this.measureInterval = setInterval(() => {
+      this.setState({
+        points: [...this.state.points, this.state.orientation.x, this.state.orientation.y]
+      })
+    }, parseInt(1000/this.state.measureFrequency));
   }
 
   startMeasure = event => {
@@ -92,7 +100,7 @@ class Device extends React.Component {
   }
 
   handleStopMeasure = () => {
-    window.removeEventListener('deviceorientation', this.startMeasure, true);
+    clearInterval(this.measureInterval);
     this.setState({ startMeasure: false })
   }
 
