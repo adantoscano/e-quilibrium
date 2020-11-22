@@ -22,12 +22,12 @@ class Device extends React.Component {
         y: 0
       },
       points: [],
-      measure: [],
       measureFrequency: 50,
       timerCount: 0,
       showQRScanner: false,
       isConnectedToDevice: false,
       isConnectedToHUD: false,
+      isRunningMeasure: false,
       maxTilt: 45,
     }
   }
@@ -70,6 +70,7 @@ class Device extends React.Component {
   }
 
   handleStartMeasure = () => {
+    this.setState({ isRunningMeasure: true })
     if (parseInt(this.state.timerCount) > 0) {
       const initialTimer = this.state.timerCount;
       const counterInterval = setInterval(() => {
@@ -88,20 +89,9 @@ class Device extends React.Component {
     }, parseInt(1000/this.state.measureFrequency));
   }
 
-  startMeasure = event => {
-    const { beta, gamma } = event;
-    const x = parseFloat(gamma).toPrecision(5);
-    const y = parseFloat(beta).toPrecision(5);
-    if (x && y) {
-      this.setState({
-        points: [...this.state.points, x, y]
-      })
-    }
-  }
-
   handleStopMeasure = () => {
     clearInterval(this.measureInterval);
-    this.setState({ startMeasure: false })
+    this.setState({ isRunningMeasure: false })
   }
 
   handleClearMeasure = () => this.setState({ points: [] })
@@ -208,8 +198,9 @@ class Device extends React.Component {
           size={this.radarSize}
           maxTilt={this.state.maxTilt} />
         {this.state.offer && <QRCode value={this.state.offer} includeMargin/>}
-        <Button onClick={this.handleStartMeasure}>Start measure</Button>
-        <Button onClick={this.handleStopMeasure}>Stop measure</Button>
+        { this.state.isRunningMeasure
+          ? <Button onClick={this.handleStopMeasure}>Stop measure</Button>
+          : <Button onClick={this.handleStartMeasure}>Start measure</Button>}
         <Button onClick={this.handleGetMaxTilt}>Get max tilt</Button>
         <Button onClick={this.handleClearMeasure}>Clear measure</Button>
         <Input placeholder='Time in seconds' onChange={this.handleChangeSeconds} />
