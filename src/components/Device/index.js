@@ -199,8 +199,8 @@ class Device extends React.Component {
           maxTilt={this.state.maxTilt} />
         {this.state.offer && <QRCode value={this.state.offer} includeMargin/>}
         { this.state.isRunningMeasure
-          ? <Button onClick={this.handleStopMeasure}>Stop measure</Button>
-          : <Button onClick={this.handleStartMeasure}>Start measure</Button>}
+          ? <Button fluid color='red' onClick={this.handleStopMeasure}>Stop measure</Button>
+          : <Button fluid color='green' onClick={this.handleStartMeasure}>Start measure</Button>}
         <Button onClick={this.handleGetMaxTilt}>Get max tilt</Button>
         <Button onClick={this.handleClearMeasure}>Clear measure</Button>
         <Input placeholder='Time in seconds' onChange={this.handleChangeSeconds} />
