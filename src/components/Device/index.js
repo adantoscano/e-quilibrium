@@ -3,7 +3,6 @@ import { withRouter } from 'react-router-dom'
 import Peer from 'simple-peer';
 import { Button, Container, Input } from 'semantic-ui-react';
 import QrReader from 'react-qr-reader'
-import QRCode from 'qrcode.react';
 import axios from 'axios';
 
 import Radar from '../Radar';
