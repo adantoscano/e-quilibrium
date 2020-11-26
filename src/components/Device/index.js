@@ -22,12 +22,12 @@ class Device extends React.Component {
       },
       points: [],
       measureFrequency: 50,
-      timerCount: 0,
+      timerCount: 20,
+      maxTilt: 20,
       showQRScanner: false,
       showResults: false,
       isConnectedToHUD: false,
       isRunningMeasure: false,
-      maxTilt: 45,
     }
   }
 
