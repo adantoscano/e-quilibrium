@@ -1,6 +1,7 @@
 import React from 'react'
 import { Button, Modal } from 'semantic-ui-react'
 import Radar from '../Radar';
+import Download from './ExcelExport';
 
 function getOveralStabilityIndex(points) {
   // points = [x1,y1,x2,y2,...]
@@ -97,6 +98,22 @@ function getQuadrantPercentage(points) {
 function Results({points, size, maxTilt, close}) {
   const zonePercentage = getZonePercentage(points, maxTilt);
   const quadrantPercentage = getQuadrantPercentage(points);
+  const results = {
+    osi: getOveralStabilityIndex(points),
+    osd: getOveralStabilityDesviation(points),
+    api: getPosteriorStabilityIndex(points),
+    apd: getPosteriorStabilityDesviation(points),
+    mli: getLateralStabilityIndex(points),
+    mld: getLateralStabilityDesviation(points),
+    zpA: zonePercentage.a,
+    zpB: zonePercentage.b,
+    zpC: zonePercentage.c,
+    zpD: zonePercentage.d,
+    qpI: quadrantPercentage.a,
+    qpII: quadrantPercentage.b,
+    qpIII: quadrantPercentage.c,
+    qpIV: quadrantPercentage.d
+  }
   return (
     <Modal
       onClose={() => close()}
@@ -113,16 +130,17 @@ function Results({points, size, maxTilt, close}) {
           />
       </Modal.Content>
       <Modal.Description>
-        <p>Overal Stability Index: {getOveralStabilityIndex(points)}</p>
-        <p>Overal Stability Desviation: {getOveralStabilityDesviation(points)}</p>
-        <p>Antero/Posterior Stability Index: {getPosteriorStabilityIndex(points)}</p>
-        <p>Antero/Posterior Stability Desviation: {getPosteriorStabilityDesviation(points)}</p>
-        <p>Medial/Lateral Stability Index: {getLateralStabilityIndex(points)}</p>
-        <p>Medial/Lateral Stability Desviation: {getLateralStabilityDesviation(points)}</p>
+        <p>Overal Stability Index: {results.osi}</p>
+        <p>Overal Stability Desviation: {results.osd}</p>
+        <p>Antero/Posterior Stability Index: {results.api}</p>
+        <p>Antero/Posterior Stability Desviation: {results.apd}</p>
+        <p>Medial/Lateral Stability Index: {results.mli}</p>
+        <p>Medial/Lateral Stability Desviation: {results.mld}</p>
         <p>Zone Percentage: A{zonePercentage.a}% B{zonePercentage.b}% C{zonePercentage.c}% D{zonePercentage.d}%</p>
-        <p>Zone Percentage: I{quadrantPercentage.a}% II{quadrantPercentage.b}% III{quadrantPercentage.c}% IV{quadrantPercentage.d}%</p>
+        <p>Quadrant Percentage: I{quadrantPercentage.a}% II{quadrantPercentage.b}% III{quadrantPercentage.c}% IV{quadrantPercentage.d}%</p>
       </Modal.Description>
       <Modal.Actions>
+        <Download results={results} points={points} button={<Button> Export </Button>}/>
         <Button color='black' onClick={() => close()}>
           Nope
         </Button>
