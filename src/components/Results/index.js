@@ -1,7 +1,22 @@
 import React from 'react'
 import { Button, Modal } from 'semantic-ui-react'
+import localForage from 'localforage';
+
 import Radar from '../Radar';
 import Download from './ExcelExport';
+
+async function savePoints(points) {
+  try {
+    const savedPoints = await localForage.getItem('points')
+    await localForage.setItem('points', [...savedPoints, {
+      date: new Date(),
+      points,
+    }]);
+    alert('Saved!');
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 function getOveralStabilityIndex(points) {
   // points = [x1,y1,x2,y2,...]
@@ -142,13 +157,13 @@ function Results({points, size, maxTilt, close}) {
       <Modal.Actions>
         <Download results={results} points={points} button={<Button> Export </Button>}/>
         <Button color='black' onClick={() => close()}>
-          Nope
+          Close
         </Button>
         <Button
-          content="Yep, that's me"
+          content='Save'
           labelPosition='right'
-          icon='checkmark'
-          onClick={() => close()}
+          icon='save'
+          onClick={() => savePoints(points)}
           positive
         />
       </Modal.Actions>
