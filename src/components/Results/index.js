@@ -7,7 +7,7 @@ import Download from './ExcelExport';
 
 async function savePoints(points) {
   try {
-    const savedPoints = await localForage.getItem('points')
+    const savedPoints = await localForage.getItem('points') || []
     await localForage.setItem('points', [...savedPoints, {
       date: new Date(),
       points,
@@ -110,7 +110,7 @@ function getQuadrantPercentage(points) {
   }
 }
 
-function Results({points, size, maxTilt, close}) {
+function Results({points, maxTilt, close}) {
   const zonePercentage = getZonePercentage(points, maxTilt);
   const quadrantPercentage = getQuadrantPercentage(points);
   const results = {
@@ -140,7 +140,7 @@ function Results({points, size, maxTilt, close}) {
           pointerX={points[points.length - 2]}
           pointerY={points[points.length - 1]}
           points={points}
-          size={size}
+          size={Math.min(window.innerHeight, window.innerWidth)/2}
           maxTilt={maxTilt}
           />
       </Modal.Content>
