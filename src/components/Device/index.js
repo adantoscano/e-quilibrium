@@ -20,6 +20,10 @@ class Device extends React.Component {
         x: 0,
         y: 0
       },
+      cob: {
+        x: 0,
+        y: 0,
+      },
       points: [],
       measureFrequency: 50,
       timerCount: 20,
@@ -42,11 +46,46 @@ class Device extends React.Component {
     if (x && y) {
       this.setState({
         orientation: {
-          x,
-          y
+          x: parseFloat(x - this.state.cob.x).toPrecision(5),
+          y: parseFloat(y - this.state.cob.y).toPrecision(5)
         }
       })
     }
+  }
+
+  handleGetCenterOfBalance = () => {
+    this.setState({ points: [], cob: { x: 0, y: 0 } })
+    const interval = setInterval(() => {
+      this.setState({
+        points: [...this.state.points, this.state.orientation.x, this.state.orientation.y]
+      })
+    }, parseInt(1000/this.state.measureFrequency));
+    setTimeout(() => {
+      clearInterval(interval);
+      this.getCenterOfBalance();
+    }, 3000);
+  }
+
+  getCenterOfBalance = () => {
+    const { x, y } = this.state.points.reduce((acc, value, index) => {
+      return index % 2
+        ? {
+            x: acc.x,
+            y: acc.y + parseFloat(value)
+          }
+        : {
+            x: acc.x + parseFloat(value),
+            y: acc.y
+          }
+      }, {x:0, y:0});
+    const cob = {
+      x: parseFloat(x/(this.state.points.length/2)).toPrecision(5),
+      y: parseFloat(y/(this.state.points.length/2)).toPrecision(5),
+    }
+    this.setState({
+      cob,
+      points: []
+    })
   }
 
   componentDidMount() {
@@ -143,6 +182,9 @@ class Device extends React.Component {
         case 'clearMeasure':
           this.handleClearMeasure();
           break;
+        case 'getCoB':
+          this.handleGetCenterOfBalance();
+          break;
         case 'changeTimer':
           this.setState({timerCount: dataJson.runValue})
           break;
@@ -189,6 +231,8 @@ class Device extends React.Component {
           { this.state.isRunningMeasure
             ? <Button fluid color='red' onClick={this.handleStopMeasure}>Stop measure</Button>
             : <Button fluid color='green' onClick={this.handleStartMeasure}>Start measure</Button>}
+          <Button fluid color='orange' onClick={this.handleGetCenterOfBalance}>Get CoB</Button>
+          <Button onClick={() => this.props.history.push('/list')}>List Results</Button>
           <Button onClick={this.handleGetMaxTilt}>Get max tilt</Button>
           <Button onClick={this.handleClearMeasure}>Clear measure</Button>
           <Input placeholder='Time in seconds' onChange={this.handleChangeSeconds} />
@@ -203,9 +247,8 @@ class Device extends React.Component {
         </Container>
         {this.state.showResults &&
           <Results
-            close={() => this.setState({showResults: false})}
+            close={() => this.setState({showResults: false, points: [] })}
             points={this.state.points}
-            size={this.radarSize/2}
             maxTilt={this.state.maxTilt}
             />}
       </div>

@@ -103,6 +103,8 @@ class Screen extends React.Component {
                 ? <Button fluid color='red' onClick={() => this.handleSendRun('stopMeasure')}>Stop measure</Button>
                 : <Button fluid color='green' onClick={() => this.handleSendRun('startMeasure')}>Start measure</Button>
               }
+              <Button fluid color='orange' onClick={() => this.handleSendRun('getCoB')}>Get CoB</Button>
+              <Button onClick={() => this.props.history.push('/list')}>List Results</Button>
               <Button onClick={() => this.handleSendRun('getMaxTilt')}>Get max tilt</Button>
               <Button onClick={() => this.handleSendRun('clearMeasure')}>Clear measure</Button>
               <Input placeholder='Time in seconds' onChange={e => this.handleSendRun('changeTimer', e.target.value)} />
@@ -117,7 +119,6 @@ class Screen extends React.Component {
           <Results
             close={() => this.handleSendRun('closeResults')}
             points={this.state.points}
-            size={this.radarSize/2}
             maxTilt={this.state.maxTilt}
             />}
         </div>}
