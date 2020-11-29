@@ -5,25 +5,30 @@ import localForage from 'localforage';
 import Results from '../Results';
 
 function ResultList() {
-  const [items, setItems] = useState([]);
   const [points, setPoints] = useState(null);
+  const [results, setResults] = useState([]);
 
   useEffect(() => {
-    localForage.getItem('points').then(data => setItems(data.map(e =>
-      <List.Item>
-        <List.Content>
-          <List.Header>{e.date.toLocaleString('en-GB')}</List.Header>
-        </List.Content>
-        <List.Content floated='right'>
-          <Button icon='eye' onClick={()=> setPoints(e.points)}/>
-        </List.Content>
-      </List.Item>
-    )))
-  }, []);
+    if ( results.length <= 0 ) localForage.getItem('points').then(data => setResults(data));
+    localForage.setItem('points', results);
+  });
 
   return(<div>
     <List celled>
-      { items }
+    { results.length <= 0 && <div> No results saved </div> }
+    { results && results.map((e, i, arr) =>
+        <List.Item>
+          <List.Content>
+            <List.Header>{e.date.toLocaleString('en-GB')}</List.Header>
+          </List.Content>
+          <List.Content floated='right'>
+            <Button icon='trash' onClick={()=> setResults(arr.filter(innerE => e !== innerE))}/>
+            <Button icon='eye' onClick={()=> setPoints(e.points)}/>
+          </List.Content>
+        </List.Item>
+      )
+
+    }
     </List>
     { points &&
       <Results
