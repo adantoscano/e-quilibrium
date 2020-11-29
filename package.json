@@ -1,6 +1,6 @@
 {
   "name": "front",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "homepage": "http://adantoscano.github.io/e-quilibrium",
   "dependencies": {
     "@testing-library/jest-dom": "^4.2.4",
@@ -27,7 +27,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "predeploy": "npm run build",
+    "predeploy": "REACT_APP_API_URL=https://e-quilibrium-api.herokuapp.com/ npm run build",
     "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
