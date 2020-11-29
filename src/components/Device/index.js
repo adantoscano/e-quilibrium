@@ -26,6 +26,7 @@ class Device extends React.Component {
       },
       points: [],
       measureFrequency: 50,
+      initialTimer: 20,
       timerCount: 20,
       maxTilt: 20,
       showQRScanner: false,
@@ -38,6 +39,7 @@ class Device extends React.Component {
   radarSize = Math.min(window.innerHeight, window.innerWidth);
 
   measureInterval = null;
+  counterInterval = null;
 
   getPointer = event => {
     const { beta, gamma } = event;
@@ -105,13 +107,13 @@ class Device extends React.Component {
   handleStartMeasure = () => {
     this.setState({ isRunningMeasure: true })
     if (parseInt(this.state.timerCount) > 0) {
-      const initialTimer = this.state.timerCount;
-      const counterInterval = setInterval(() => {
+      this.setState({ initialTimer: this.state.timerCount });
+      this.counterInterval = setInterval(() => {
         this.setState({ timerCount: this.state.timerCount - 1 })
         if (this.state.timerCount <= 0) {
           this.handleStopMeasure();
-          this.setState({ timerCount: initialTimer })
-          clearInterval(counterInterval);
+          this.setState({ timerCount: this.state.initialTimer })
+          clearInterval(this.counterInterval);
         }
       }, 1000);
     }
@@ -123,6 +125,10 @@ class Device extends React.Component {
   }
 
   handleStopMeasure = () => {
+    if (this.counterInterval) {
+      clearInterval(this.counterInterval)
+      this.setState({timerCount: this.state.initialTimer})
+    }
     clearInterval(this.measureInterval);
     this.setState({ isRunningMeasure: false, showResults: true })
   }
